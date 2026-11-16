@@ -265,7 +265,7 @@ export default function TopicsPage() {
           title="Topics"
           description="Manage session topics, schedules and assigned faculty members."
           actions={
-            <Button onClick={openCreateDialog}>
+            <Button onClick={openCreateDialog} className="h-11 px-5">
               <Plus className="size-4" />
               Add Topic
             </Button>

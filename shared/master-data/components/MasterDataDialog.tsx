@@ -90,7 +90,7 @@ export function MasterDataDialog<
 
   const description = isEditing
     ? `Update the existing ${config.entity.singular.toLowerCase()} information.`
-    : `Create a new ${config.entity.singular.toLowerCase()} for ExpoCon.`
+    : `Create a new ${config.entity.singular.toLowerCase()} for Conference.`
 
 
   return (

@@ -2,7 +2,7 @@
 "use client";
 
 import type { ColumnDef, Row } from "@tanstack/react-table";
-import { CalendarDays, Clock3, Users } from "lucide-react";
+import { CalendarDays, Clock3, Users, Pencil, Trash2 } from "lucide-react";
 
 import { RowActionsDropdown } from "@/components/common/row-actions-dropdown";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -151,28 +151,30 @@ export function createTopicColumns({
       ),
     },
     {
-      id: "actions",
-      header: "Actions",
-      enableSorting: false,
-      enableHiding: false,
-      cell: ({ row }: { row: Row<Topic> }) => (
-        <RowActionsDropdown>
-          <DropdownMenuItem
-            onClick={() => onEdit(row.original)}
-            className="h-10 cursor-pointer gap-2.5 font-medium"
-          >
-            Edit
-          </DropdownMenuItem>
+  id: "actions",
+  header: "Actions",
+  enableSorting: false,
+  enableHiding: false,
+  cell: ({ row }: { row: Row<Topic> }) => (
+    <RowActionsDropdown>
+      <DropdownMenuItem
+        onClick={() => onEdit(row.original)}
+        className="h-10 cursor-pointer gap-2.5 font-medium"
+      >
+        <Pencil className="size-4" />
+        <span>Edit</span>
+      </DropdownMenuItem>
 
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => onDelete(row.original)}
-            className="h-10 cursor-pointer gap-2.5 font-medium"
-          >
-            Delete
-          </DropdownMenuItem>
-        </RowActionsDropdown>
-      ),
-    },
+      <DropdownMenuItem
+        variant="destructive"
+        onClick={() => onDelete(row.original)}
+        className="h-10 cursor-pointer gap-2.5 font-medium"
+      >
+        <Trash2 className="size-4" />
+        <span>Delete</span>
+      </DropdownMenuItem>
+    </RowActionsDropdown>
+  ),
+},
   ];
 }

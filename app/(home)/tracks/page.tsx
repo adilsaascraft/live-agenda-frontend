@@ -147,6 +147,7 @@ export default function TrackPage() {
                 setEditing(null);
                 setDialogOpen(true);
               }}
+              className="h-11 px-5"
             >
               <Plus className="h-4 w-4" />
               Add Track

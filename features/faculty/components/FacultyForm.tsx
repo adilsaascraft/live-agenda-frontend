@@ -134,12 +134,13 @@ export function FacultyForm({
         />
 
         {/* Actions */}
-        <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-between">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={isPending}
+            className="h-11 px-5"
           >
             Cancel
           </Button>
@@ -147,6 +148,7 @@ export function FacultyForm({
           <Button
             type="submit"
             disabled={isPending}
+            className="h-11 px-5"
           >
             {isPending
               ? "Saving..."

@@ -152,7 +152,7 @@ export function MasterDataForm<T extends FieldValues>({
 
         <Button
           type="submit"
-          className="w-full"
+          className="w-full h-11 px-5"
           disabled={isPending}
         >
           {isPending ? "Saving..." : submitLabel}

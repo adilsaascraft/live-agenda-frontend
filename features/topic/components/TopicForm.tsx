@@ -4,7 +4,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
-import { Check, Search, Users, X } from "lucide-react";
+import {
+  Check,
+  Search,
+  Users,
+  X,
+  CalendarDays,
+  Clock3,
+  MapPin,
+  Layers3,
+} from "lucide-react";
+
+import { formatDateOnly } from "@/lib/formatIndianDate";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -339,51 +350,110 @@ export function TopicForm({
             </p>
           )}
 
-          <FormField
-            control={form.control}
-            name="sessionId"
-            render={({ field }) => {
-              const selectedSession = sessions.find(
-                (session) => session._id === field.value,
-              );
+          
+<FormField
+  control={form.control}
+  name="sessionId"
+  render={({ field }) => {
+    const selectedSession = sessions.find(
+      (session) => session._id === field.value,
+    );
 
-              return (
-                <FormItem>
-                  <FormLabel className="text-sm font-semibold">
-                    Session *
-                  </FormLabel>
+    return (
+      <FormItem>
+        <FormLabel className="text-sm font-semibold">
+          Session *
+        </FormLabel>
 
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isLoadingOptions || isPending}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-10 w-full bg-background">
-                        <SelectValue>
-                          {selectedSession?.sessionName ??
-                            "Select a session"}
-                        </SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
+        <Select
+          value={field.value}
+          onValueChange={field.onChange}
+          disabled={isLoadingOptions || isPending}
+        >
+          <FormControl>
+            <SelectTrigger className="h-11 w-full bg-background">
+              <SelectValue placeholder="Select a session">
+                {selectedSession?.sessionName}
+              </SelectValue>
+            </SelectTrigger>
+          </FormControl>
 
-                    <SelectContent>
-                      {sessions.map((session) => (
-                        <SelectItem
-                          key={session._id}
-                          value={session._id}
-                        >
-                          {session.sessionName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <SelectContent className="max-h-[350px]">
+            {sessions.map((session) => (
+              <SelectItem
+                key={session._id}
+                value={session._id}
+                className="cursor-pointer py-3"
+              >
+                <div className="flex w-full min-w-0 flex-col gap-2 py-1">
 
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
+                  {/* Session name */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                      <Layers3 className="size-4" />
+                    </div>
+
+                    <span className="text-sm font-semibold text-foreground">
+                      {session.sessionName}
+                    </span>
+                  </div>
+
+                  {/* Session date and time */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pl-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <CalendarDays className="size-3.5 text-primary" />
+                      {formatDateOnly(session.sessionDate)}
+                    </span>
+
+                    <span className="flex items-center gap-1.5">
+                      <Clock3 className="size-3.5 text-primary" />
+                      {session.startTime} – {session.endTime}
+                    </span>
+                  </div>
+
+                  {/* Hall and track */}
+                  <div className="flex flex-wrap items-center gap-2 pl-1">
+                    <span className="inline-flex items-center gap-1 rounded-md border bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">
+                      <MapPin className="size-3" />
+                      {session.hallId?.hallName ?? "No Hall"}
+                    </span>
+
+                    <span className="inline-flex items-center gap-1 rounded-md border bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">
+                      <Layers3 className="size-3" />
+                      {session.trackId?.trackName ?? "No Track"}
+                    </span>
+                  </div>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Selected session details */}
+        {selectedSession && (
+          <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="size-4 text-primary shrink-0" />
+              <span className="text-sm font-medium">
+                {formatDateOnly(selectedSession.sessionDate)}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Clock3 className="size-4 text-primary shrink-0" />
+              <span className="text-sm text-muted-foreground">
+                {selectedSession.startTime} – {selectedSession.endTime}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <FormMessage />
+      </FormItem>
+    );
+  }}
+/>
+
 
           <FormField
             control={form.control}
@@ -548,12 +618,13 @@ export function TopicForm({
         </section>
 
         {/* Actions */}
-        <div className="flex flex-col-reverse gap-3 border-t pt-4 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-3 border-t pt-4 sm:flex-row sm:justify-between">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={isPending}
+            className="h-11 px-5"
           >
             Cancel
           </Button>
@@ -561,6 +632,7 @@ export function TopicForm({
           <Button
             type="submit"
             disabled={isPending || isLoadingOptions}
+            className="h-11 px-5"
           >
             {isPending
               ? "Saving..."

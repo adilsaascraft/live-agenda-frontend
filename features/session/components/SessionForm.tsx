@@ -709,12 +709,13 @@ export function SessionForm({
         {/* Form Actions                                                     */}
         {/* ----------------------------------------------------------------- */}
 
-        <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-between">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={isPending}
+            className="h-11 px-5"
           >
             Cancel
           </Button>
@@ -722,6 +723,7 @@ export function SessionForm({
           <Button
             type="submit"
             disabled={isPending}
+            className="h-11 px-5"
           >
             {isPending
               ? "Saving..."

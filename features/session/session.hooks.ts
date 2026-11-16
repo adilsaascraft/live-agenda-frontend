@@ -17,6 +17,7 @@ import type {
   SessionListParams,
   UpdateSessionPayload,
 } from "./session.types";
+import { getIndianFormattedDate } from "@/lib/formatIndianDate";
 
 export function useSessions(params: SessionListParams) {
   return useQuery({
@@ -61,8 +62,9 @@ export function useCreateSession() {
       await queryClient.invalidateQueries({
         queryKey: SESSION_CONFIG.queryKey,
       });
-
-      toast.success("Session created successfully.");
+      toast.success("Session created successfully!", {
+          description: getIndianFormattedDate(),
+        });
     },
 
     onError: (error: Error) => {
@@ -88,7 +90,9 @@ export function useUpdateSession() {
         queryKey: SESSION_CONFIG.queryKey,
       });
 
-      toast.success("Session updated successfully.");
+      toast.success("Session updated successfully!", {
+          description: getIndianFormattedDate(),
+        });
     },
 
     onError: (error: Error) => {
@@ -108,7 +112,9 @@ export function useDeleteSession() {
         queryKey: SESSION_CONFIG.queryKey,
       });
 
-      toast.success("Session deleted successfully.");
+      toast.warning("Session deleted successfully!", {
+          description: getIndianFormattedDate(),
+        });
     },
 
     onError: (error: Error) => {

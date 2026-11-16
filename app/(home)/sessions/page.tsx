@@ -342,7 +342,7 @@ export default function SessionsPage() {
           title="Sessions"
           description="Manage event sessions, halls, tracks and chairpersons."
           actions={
-            <Button onClick={openCreateDialog}>
+            <Button onClick={openCreateDialog} className="h-11 px-5">
               <Plus className="size-4" />
               Add Session
             </Button>

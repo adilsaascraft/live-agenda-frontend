@@ -4,8 +4,11 @@ import { useCallback, useMemo, useState } from "react";
 
 import {
   Plus,
+  Search,
+  Users,
   UsersRound,
 } from "lucide-react";
+import { Badge as ShadcnBadge } from "@/components/ui/badge";
 
 import { Button } from "@/components/ui/button";
 
@@ -252,7 +255,7 @@ export default function FacultiesPage() {
           title="Faculties"
           description="Manage faculty members and their contact information."
           actions={
-            <Button onClick={openCreateDialog}>
+            <Button onClick={openCreateDialog} className="h-11 px-5">
               <Plus className="size-4" />
               Add Faculty
             </Button>
@@ -271,11 +274,39 @@ export default function FacultiesPage() {
             />
           </div>
 
-          <div className="text-sm text-muted-foreground">
-            {search
-              ? `${pagination?.total ?? 0} matching faculties`
-              : `${pagination?.total ?? 0} faculties`}
-          </div>
+          
+<div className="flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm">
+  <div className="flex items-center gap-3">
+    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+      <Users className="h-5 w-5" />
+    </div>
+
+    <div className="space-y-0.5">
+      <div className="flex items-baseline gap-2">
+        <span className="text-xl font-bold tracking-tight">
+          {pagination?.total ?? 0}
+        </span>
+        <span className="text-sm font-medium text-foreground">
+          {search ? "Matching faculties" : "Total faculties"}
+        </span>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        {search
+          ? "Faculty records matching your search"
+          : "All registered faculty members"}
+      </p>
+    </div>
+  </div>
+
+  {search && (
+  <ShadcnBadge variant="secondary" className="shrink-0 gap-1">
+    <Search className="h-3 w-3" />
+    Filtered
+  </ShadcnBadge>
+)}
+</div>
+
         </div>
 
         {/* Table */}
@@ -312,17 +343,19 @@ export default function FacultiesPage() {
         onOpenChange={closeFacultyDialog}
       >
         <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
-              {editing ? "Edit Faculty" : "Add Faculty"}
-            </DialogTitle>
+          
+<DialogHeader>
+  <DialogTitle className="font-bold text-md text-center">
+    {editing ? "Edit Faculty" : "Add Faculty"}
+  </DialogTitle>
 
-            <DialogDescription>
-              {editing
-                ? "Update the faculty member's contact information."
-                : "Enter the details to create a new faculty member."}
-            </DialogDescription>
-          </DialogHeader>
+  <DialogDescription className="text-center">
+    {editing
+      ? "Update the faculty member's contact information."
+      : "Enter the details to create a new faculty member."}
+  </DialogDescription>
+</DialogHeader>
+
 
           {actionError && (
             <div

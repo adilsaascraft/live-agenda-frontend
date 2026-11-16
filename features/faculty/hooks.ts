@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -6,6 +7,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { getIndianFormattedDate } from "@/lib/formatIndianDate";
 
 import { FACULTY_CONFIG } from "./config";
 
@@ -64,6 +68,14 @@ export function useFacultyCreate() {
       await queryClient.invalidateQueries({
         queryKey: FACULTY_CONFIG.queryKey,
       });
+
+      toast.success("Faculty created successfully!", {
+        description: getIndianFormattedDate(),
+      });
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to create faculty.");
     },
   });
 }
@@ -87,6 +99,14 @@ export function useFacultyUpdate() {
       await queryClient.invalidateQueries({
         queryKey: FACULTY_CONFIG.queryKey,
       });
+
+      toast.success("Faculty updated successfully!", {
+        description: getIndianFormattedDate(),
+      });
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update faculty.");
     },
   });
 }
@@ -104,6 +124,14 @@ export function useFacultyDelete() {
       await queryClient.invalidateQueries({
         queryKey: FACULTY_CONFIG.queryKey,
       });
+
+      toast.warning("Faculty deleted successfully!", {
+        description: getIndianFormattedDate(),
+      });
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to delete faculty.");
     },
   });
 }

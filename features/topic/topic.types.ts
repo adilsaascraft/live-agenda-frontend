@@ -8,14 +8,28 @@ export interface TopicFaculty {
   mobile: string
 }
 
+
+export interface TopicHall {
+  _id: string;
+  hallName: string;
+}
+
+export interface TopicTrack {
+  _id: string;
+  trackName: string;
+}
+
 export interface TopicSession {
   _id: string;
   sessionName: string;
   sessionDate: string;
   startTime: string;
   endTime: string;
+  hallId: TopicHall;
+  trackId: TopicTrack;
   chairperson?: TopicFaculty[];
 }
+
 
 export type TopicReference<T> = T | string | null;
 

@@ -6,6 +6,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { getIndianFormattedDate } from "@/lib/formatIndianDate";
 
 import { TOPIC_CONFIG } from "./topic.config";
 
@@ -24,6 +27,9 @@ import type {
   UpdateTopicPayload,
 } from "./topic.types";
 
+/**
+ * Topics list query.
+ */
 export function useTopics(params: TopicListParams) {
   return useQuery({
     queryKey: [...TOPIC_CONFIG.queryKey, params],
@@ -33,6 +39,9 @@ export function useTopics(params: TopicListParams) {
   });
 }
 
+/**
+ * Topic sessions lookup query.
+ */
 export function useTopicSessions() {
   return useQuery({
     queryKey: ["sessions", "all"],
@@ -41,6 +50,9 @@ export function useTopicSessions() {
   });
 }
 
+/**
+ * Topic faculties lookup query.
+ */
 export function useTopicFaculties() {
   return useQuery({
     queryKey: ["faculties", "all"],
@@ -49,19 +61,35 @@ export function useTopicFaculties() {
   });
 }
 
+/**
+ * Create topic mutation.
+ */
 export function useCreateTopic() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateTopicPayload) => createTopic(payload),
+    mutationFn: (payload: CreateTopicPayload) =>
+      createTopic(payload),
+
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: TOPIC_CONFIG.queryKey,
       });
+
+      toast.success("Topic created successfully!", {
+        description: getIndianFormattedDate(),
+      });
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to create topic.");
     },
   });
 }
 
+/**
+ * Update topic mutation.
+ */
 export function useUpdateTopic() {
   const queryClient = useQueryClient();
 
@@ -73,23 +101,44 @@ export function useUpdateTopic() {
       id: string;
       payload: UpdateTopicPayload;
     }) => updateTopic({ id, payload }),
+
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: TOPIC_CONFIG.queryKey,
       });
+
+      toast.success("Topic updated successfully!", {
+        description: getIndianFormattedDate(),
+      });
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update topic.");
     },
   });
 }
 
+/**
+ * Delete topic mutation.
+ */
 export function useDeleteTopic() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => deleteTopic(id),
+
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: TOPIC_CONFIG.queryKey,
       });
+
+      toast.warning("Topic deleted successfully!", {
+        description: getIndianFormattedDate(),
+      });
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to delete topic.");
     },
   });
 }
