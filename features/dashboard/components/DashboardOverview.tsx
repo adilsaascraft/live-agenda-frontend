@@ -799,6 +799,7 @@ export default function DashboardOverview({ data, onRefresh, isRefreshing, refre
             description={`${topicCount("Talk")} talks, ${topicCount("Debate")} debates, ${topicCount("Panel Discussion")} panels`}
             icon={Layers3}
             tone="violet"
+            href="/topics"
           />
           <StatCard
             title="Faculty"
