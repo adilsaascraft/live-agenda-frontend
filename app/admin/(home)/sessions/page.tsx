@@ -452,6 +452,7 @@ export default function SessionsPage() {
               ? "No sessions match your search."
               : "No sessions found. Create your first session."
           }
+          className="w-full"
         />
 
         {/* ---------------------------------------------------------------- */}

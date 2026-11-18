@@ -9,6 +9,10 @@ import {
   Pencil,
   Trash2,
   Users,
+  Building2,
+  Layers,
+  FileText,
+  Phone,
 } from "lucide-react";
 
 import { RowActionsDropdown } from "@/components/common/row-actions-dropdown";
@@ -16,7 +20,6 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 import type {
   Session,
-  SessionChairperson,
   SessionHall,
   SessionTrack,
 } from "../session.types";
@@ -30,7 +33,6 @@ function getHallName(
   value: SessionHall | string | null | undefined,
 ): string {
   if (!value) return "Deleted hall";
-
   if (typeof value === "string") return "Hall unavailable";
 
   return value.hallName || "Deleted hall";
@@ -40,33 +42,9 @@ function getTrackName(
   value: SessionTrack | string | null | undefined,
 ): string {
   if (!value) return "Deleted track";
-
   if (typeof value === "string") return "Track unavailable";
 
   return value.trackName || "Deleted track";
-}
-
-function getChairpersonNames(
-  values: (
-    | SessionChairperson
-    | string
-    | null
-    | undefined
-  )[] | null | undefined,
-): string[] {
-  if (!Array.isArray(values) || values.length === 0) {
-    return ["No chairperson available"];
-  }
-
-  return values.map((item) => {
-    if (!item) return "Deleted faculty";
-
-    if (typeof item === "string") {
-      return "Faculty unavailable";
-    }
-
-    return item.fullName || "Deleted faculty";
-  });
 }
 
 function formatSessionDate(value: string): string {
@@ -74,9 +52,7 @@ function formatSessionDate(value: string): string {
 
   const date = new Date(value);
 
-  return isValid(date)
-    ? format(date, "dd MMM yyyy")
-    : "—";
+  return isValid(date) ? format(date, "dd MMM yyyy") : "—";
 }
 
 export function createSessionColumns({
@@ -84,58 +60,104 @@ export function createSessionColumns({
   onDelete,
 }: SessionColumnsOptions): ColumnDef<Session>[] {
   return [
+    // Session Name
     {
       accessorKey: "sessionName",
-      header: "Session Name",
+      header: () => (
+        <div className="flex items-center gap-2">
+          <FileText className="size-4 text-muted-foreground" />
+          Session Name
+        </div>
+      ),
+      size: 220,
+      minSize: 180,
+      maxSize: 300,
       cell: ({ row }) => (
-        <span className="font-semibold">
-          {row.original.sessionName || "Untitled session"}
-        </span>
+        <div className="flex min-w-0 items-center gap-2">
+          <FileText className="size-4 shrink-0 text-muted-foreground md:hidden" />
+          <span className="font-semibold">
+            {row.original.sessionName || "Untitled session"}
+          </span>
+        </div>
       ),
     },
+
+    // Hall
     {
       id: "hall",
-      header: "Hall",
+      header: () => (
+        <div className="flex items-center gap-2">
+          <Building2 className="size-4 text-muted-foreground" />
+          Hall
+        </div>
+      ),
+      size: 160,
+      minSize: 130,
+      maxSize: 220,
       cell: ({ row }) => {
         const hall = row.original.hallId;
-        const isMissing = !hall;
 
         return (
-          <span
-            className={
-              isMissing
-                ? "text-muted-foreground italic"
-                : undefined
-            }
-          >
-            {getHallName(hall)}
-          </span>
+          <div className="flex items-center gap-2">
+            <Building2 className="size-4 shrink-0 text-muted-foreground md:hidden" />
+            <span
+              className={
+                !hall
+                  ? "italic text-muted-foreground"
+                  : undefined
+              }
+            >
+              {getHallName(hall)}
+            </span>
+          </div>
         );
       },
     },
+
+    // Track
     {
       id: "track",
-      header: "Track",
+      header: () => (
+        <div className="flex items-center gap-2">
+          <Layers className="size-4 text-muted-foreground" />
+          Track
+        </div>
+      ),
+      size: 160,
+      minSize: 130,
+      maxSize: 220,
       cell: ({ row }) => {
         const track = row.original.trackId;
-        const isMissing = !track;
 
         return (
-          <span
-            className={
-              isMissing
-                ? "text-muted-foreground italic"
-                : undefined
-            }
-          >
-            {getTrackName(track)}
-          </span>
+          <div className="flex items-center gap-2">
+            <Layers className="size-4 shrink-0 text-muted-foreground md:hidden" />
+            <span
+              className={
+                !track
+                  ? "italic text-muted-foreground"
+                  : undefined
+              }
+            >
+              {getTrackName(track)}
+            </span>
+          </div>
         );
       },
     },
+
+    // Session Date
     {
       accessorKey: "sessionDate",
-      header: "Session Date",
+      header: () => (
+        <div className="flex items-center gap-2">
+          <CalendarDays className="size-4 text-muted-foreground" />
+          Session Date
+        </div>
+      ),
+      size: 160,
+      minSize: 140,
+      maxSize: 200,
       cell: ({ row }) => (
         <div className="flex items-center gap-2 whitespace-nowrap">
           <CalendarDays className="size-4 shrink-0 text-muted-foreground" />
@@ -143,9 +165,19 @@ export function createSessionColumns({
         </div>
       ),
     },
+
+    // Time
     {
       id: "time",
-      header: "Time",
+      header: () => (
+        <div className="flex items-center gap-2">
+          <Clock className="size-4 text-muted-foreground" />
+          Time
+        </div>
+      ),
+      size: 180,
+      minSize: 150,
+      maxSize: 220,
       cell: ({ row }) => (
         <div className="flex items-center gap-2 whitespace-nowrap">
           <Clock className="size-4 shrink-0 text-muted-foreground" />
@@ -156,40 +188,102 @@ export function createSessionColumns({
         </div>
       ),
     },
-    {
-      id: "chairperson",
-      header: "Chairpersons",
-      cell: ({ row }) => {
-        const names = getChairpersonNames(
-          row.original.chairperson,
-        );
 
-        return (
-          <div className="flex max-w-xs items-start gap-2">
-            <Users className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+  
+    // Chairpersons
+{
+  id: "chairperson",
+  header: () => (
+    <div className="flex items-center gap-2">
+      <Users className="size-4 text-muted-foreground" />
+      Chairpersons
+    </div>
+  ),
+  size: 280,
+  minSize: 220,
+  maxSize: 380,
+  cell: ({ row }) => {
+    const chairpersons = row.original.chairperson;
 
-            <div className="flex flex-col gap-1">
-              {names.map((name, index) => (
-                <span
-                  key={`${name}-${index}`}
-                  className={
-                    name.startsWith("Deleted") ||
-                    name.includes("unavailable")
-                      ? "text-muted-foreground italic"
-                      : undefined
-                  }
-                >
-                  {name}
-                </span>
-              ))}
+    if (!Array.isArray(chairpersons) || chairpersons.length === 0) {
+      return (
+        <div className="flex items-center gap-2">
+          <Users className="size-4 shrink-0 text-muted-foreground md:hidden" />
+          <span className="text-sm italic text-muted-foreground">
+            No chairperson assigned
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex max-w-xs flex-col gap-2">
+        {chairpersons.map((person, index) => {
+          const isString = typeof person === "string";
+
+          const name = isString
+            ? "Faculty unavailable"
+            : person?.fullName || "Deleted faculty";
+
+          const mobile = isString ? "" : person?.mobile || "";
+
+          const isUnavailable =
+            name.startsWith("Deleted") ||
+            name.includes("unavailable");
+
+          return (
+            <div
+              key={
+                isString
+                  ? `${person}-${index}`
+                  : person._id || index
+              }
+              className="rounded-md border border-sky-100 bg-sky-50 px-3 py-2"
+            >
+              <div className="flex items-start gap-2">
+                {/* Icons */}
+                <div className="flex shrink-0 flex-col gap-1.5">
+                  <Users className="mt-0.5 size-4 text-sky-600" />
+
+                  {mobile && (
+                    <Phone className="size-3.5 text-sky-600" />
+                  )}
+                </div>
+
+                {/* Details */}
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span
+                    className={
+                      isUnavailable
+                        ? "text-sm italic text-muted-foreground"
+                        : "text-sm font-medium text-sky-950"
+                    }
+                  >
+                    {name}
+                  </span>
+
+                  {mobile && (
+                    <span className="text-xs leading-4 text-sky-700">
+                      {mobile}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        );
-      },
-    },
+          );
+        })}
+      </div>
+    );
+  },
+},
+
+    // Actions
     {
       id: "actions",
       header: "Actions",
+      size: 100,
+      minSize: 90,
+      maxSize: 120,
       enableSorting: false,
       enableHiding: false,
       cell: ({ row }: { row: Row<Session> }) => (

@@ -9,7 +9,7 @@ export const AUTH_ENDPOINTS = {
 } as const;
 
 export const AUTH_ROUTES = {
-  login: "/login",
-  forgotPassword: "/forgot-password",
-  dashboard: "/dashboard",
+  login: "/admin/login",
+  forgotPassword: "/admin/forgot-password",
+  dashboard: "/admin/dashboard",
 } as const;

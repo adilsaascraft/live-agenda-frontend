@@ -347,6 +347,7 @@ export default function TopicsPage() {
               ? "No topics match your search."
               : "No topics found. Create your first topic."
           }
+          className="w-full"
         />
 
         {/* Server-side pagination */}

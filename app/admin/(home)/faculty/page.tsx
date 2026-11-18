@@ -311,15 +311,16 @@ export default function FacultiesPage() {
 
         {/* Table */}
         <DataTable
-          columns={columns}
-          data={faculties}
-          isLoading={isFetching}
-          emptyMessage={
+  columns={columns}
+  data={faculties}
+  isLoading={isFetching}
+  emptyMessage={
             search
               ? "No faculties match your search."
               : "No faculties found. Add your first faculty."
           }
-        />
+  className="w-full"
+/>
 
         {/* Server-side Pagination */}
         {pagination && (

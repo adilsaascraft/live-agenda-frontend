@@ -23,12 +23,10 @@ import {
 interface DataTableProps<TData extends RowData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-
   className?: string
-
   isLoading?: boolean
-
   emptyMessage?: string
+  minTableWidth?: number | string
 }
 
 export function DataTable<TData extends RowData, TValue>({
@@ -37,11 +35,27 @@ export function DataTable<TData extends RowData, TValue>({
   className,
   isLoading = false,
   emptyMessage = 'No data found.',
+  minTableWidth = '100%',
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    defaultColumn: {
+      size: 180,
+      minSize: 80,
+      maxSize: 600,
+    },
+  })
+
+  const totalWidth = table
+    .getVisibleLeafColumns()
+    .reduce((total, column) => total + column.getSize(), 0)
+
+  const getColumnStyle = (size: number) => ({
+    width: `${size}px`,
+    minWidth: `${size}px`,
+    maxWidth: `${size}px`,
   })
 
   return (
@@ -51,74 +65,86 @@ export function DataTable<TData extends RowData, TValue>({
         className,
       )}
     >
-      {/* Horizontal Scroll */}
-
-      <div className="custom-scroll overflow-x-auto">
-        <Table className="w-max min-w-full bg-background text-foreground">
+      {/* Horizontal Scroll Container */}
+      <div
+        className="
+          custom-scroll
+          w-full
+          overflow-x-auto
+          overflow-y-hidden
+          overscroll-x-contain
+          scroll-smooth
+          touch-pan-x
+        "
+        style={{
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <Table
+          className="table-fixed bg-background text-foreground"
+          style={{
+            width: `${Math.max(totalWidth, 0)}px`,
+            minWidth: minTableWidth,
+          }}
+        >
           {/* Header */}
-
           <TableHeader className="sticky top-0 z-10 bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
                 className="border-b bg-gray-50 hover:bg-gray-50"
               >
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    style={{
-                      width: header.getSize(),
-                      minWidth: header.column.columnDef.minSize,
-                      maxWidth: header.column.columnDef.maxSize,
-                    }}
-                    className="
-    h-14
-    whitespace-normal
-    break-words
-    px-4
-    text-sm
-    font-semibold
-    text-gray-700
-    bg-gray-50
-  "
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  const size = header.getSize()
+
+                  return (
+                    <TableHead
+                      key={header.id}
+                      style={getColumnStyle(size)}
+                      className="
+                        h-14
+                        whitespace-normal
+                        break-words
+                        px-4
+                        text-sm
+                        font-semibold
+                        text-gray-700
+                        bg-gray-50
+                      "
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
             ))}
           </TableHeader>
 
           {/* Body */}
-
           <TableBody className="bg-background">
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, index) => (
+              Array.from({ length: 5 }).map((_, rowIndex) => (
                 <TableRow
-                  key={index}
+                  key={rowIndex}
                   className="bg-background hover:bg-background"
                 >
-                  {columns.map((_, columnIndex) => (
+                  {table.getVisibleLeafColumns().map((column) => (
                     <TableCell
-                      key={columnIndex}
-                      className="
-                        h-14
-                        px-6
-                        align-middle
-                        bg-background
-                      "
+                      key={column.id}
+                      style={getColumnStyle(column.getSize())}
+                      className="h-14 px-4 align-middle"
                     >
                       <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : table.getRowModel().rows.length ? (
+            ) : table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -132,20 +158,16 @@ export function DataTable<TData extends RowData, TValue>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      style={{
-                        width: cell.column.getSize(),
-                        minWidth: cell.column.columnDef.minSize,
-                        maxWidth: cell.column.columnDef.maxSize,
-                      }}
+                      style={getColumnStyle(cell.column.getSize())}
                       className="
-    whitespace-normal
-    break-words
-    px-4
-    py-3
-    align-middle
-    text-sm
-    text-foreground
-  "
+                        whitespace-normal
+                        break-words
+                        px-4
+                        py-3
+                        align-middle
+                        text-sm
+                        text-foreground
+                      "
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -158,7 +180,7 @@ export function DataTable<TData extends RowData, TValue>({
             ) : (
               <TableRow className="bg-background hover:bg-background">
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getVisibleLeafColumns().length}
                   className="
                     h-32
                     bg-background

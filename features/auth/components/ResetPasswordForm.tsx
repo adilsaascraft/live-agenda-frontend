@@ -46,7 +46,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       const response = await resetPassword(token, { password: values.password });
       if (!response.success) throw new Error(response.message);
       setSubmitted(true);
-      window.setTimeout(() => router.replace("/login"), 1800);
+      window.setTimeout(() => router.replace("/admin/login"), 1800);
     } catch (error) {
       setServerError(getAuthErrorMessage(error));
     }
@@ -60,7 +60,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         </div>
         <h2 className="text-lg font-semibold">Password updated</h2>
         <p className="text-sm text-muted-foreground">Your password has been reset. Redirecting you to login...</p>
-        <Link href="/login" className="text-sm font-semibold text-primary hover:underline">Continue to login</Link>
+        <Link href="/admin/login" className="text-sm font-semibold text-primary hover:underline">Continue to login</Link>
       </div>
     );
   }

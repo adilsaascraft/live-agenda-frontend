@@ -13,6 +13,7 @@ export interface SessionChairperson {
   _id: string;
   fullName: string;
   email: string;
+  mobile: string
 }
 
 export interface Session {

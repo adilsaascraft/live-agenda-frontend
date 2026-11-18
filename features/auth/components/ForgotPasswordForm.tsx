@@ -52,7 +52,7 @@ export function ForgotPasswordForm() {
         <p className="text-sm leading-6 text-muted-foreground">
           If an account exists for that email address, password reset instructions have been sent.
         </p>
-        <Link href="/login" className="inline-block text-sm font-semibold text-primary hover:underline">
+        <Link href="/admin/login" className="inline-block text-sm font-semibold text-primary hover:underline">
           Back to login
         </Link>
       </div>
@@ -79,7 +79,7 @@ export function ForgotPasswordForm() {
         {isSubmitting ? "Sending instructions..." : "Send reset instructions"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
-        Remember your password? <Link href="/login" className="font-semibold text-primary hover:underline">Sign in</Link>
+        Remember your password? <Link href="/admin/login" className="font-semibold text-primary hover:underline">Sign in</Link>
       </p>
     </form>
   );
