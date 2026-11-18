@@ -17,12 +17,12 @@ import {
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Hall", href: "/halls", icon: Building2 },
-  { name: "Track", href: "/tracks", icon: AudioLines },
-  { name: "Faculty", href: "/faculty", icon: GraduationCap },
-  { name: "Session", href: "/sessions", icon: CalendarDays },
-  { name: "Topic", href: "/topics", icon: ClipboardList },
+  { name: "Dashboard", href: "/admin/dashboard", icon: Home },
+  { name: "Hall", href: "/admin/halls", icon: Building2 },
+  { name: "Track", href: "/admin/tracks", icon: AudioLines },
+  { name: "Faculty", href: "/admin/faculty", icon: GraduationCap },
+  { name: "Session", href: "/admin/sessions", icon: CalendarDays },
+  { name: "Topic", href: "/admin/topics", icon: ClipboardList },
 ];
 
 function MobileNavbar() {
