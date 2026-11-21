@@ -16,7 +16,7 @@ interface SpeakerNavigatorProps {
 }
 
 const iconButton =
-  "inline-flex size-9 shrink-0 touch-manipulation items-center justify-center rounded-full transition-colors hover:bg-white/15 active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400";
+  "inline-flex size-10 shrink-0 touch-manipulation items-center justify-center rounded-full transition-colors hover:bg-white/15 active:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400";
 
 export function SpeakerNavigator({
   navigation,
@@ -32,24 +32,24 @@ export function SpeakerNavigator({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 16, scale: 0.96 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="fixed inset-x-3 bottom-4 z-40 mx-auto flex w-fit max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border px-3 py-1.5 shadow-xl sm:gap-2.5 sm:px-4"
+      className="fixed inset-x-3 bottom-4 z-[70] mx-auto flex w-fit max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border px-3 py-1.5 shadow-xl sm:gap-2.5 sm:px-4"
       style={{
         backgroundColor: colors.zinc[900],
         borderColor: colors.zinc[700],
         color: colors.zinc[50],
         marginBottom: "env(safe-area-inset-bottom, 0px)",
-        touchAction: "manipulation",
+        touchAction: "pan-x",
       }}
     >
-      {/* Close button - top left */}
+      {/* Close - raised above the bar */}
       <button
         type="button"
         onClick={onClose}
         aria-label="Close appearance navigator"
-        className={`${iconButton} absolute -left-2 -top-2 z-50 border`}
+        className={`${iconButton} absolute -left-2 -top-4 z-[80]`}
         style={{
           backgroundColor: colors.zinc[800],
-          borderColor: colors.zinc[700],
+          border: `1px solid ${colors.zinc[700]}`,
           color: colors.orange[300],
         }}
       >
@@ -83,12 +83,12 @@ export function SpeakerNavigator({
         <ChevronLeft className="size-4" aria-hidden="true" />
       </button>
 
-      {/* Next */}
+      {/* Next - slightly shifted left */}
       <button
         type="button"
         onClick={onNext}
         aria-label="Next appearance"
-        className={iconButton}
+        className={`${iconButton} mr-1`}
         style={{ touchAction: "manipulation" }}
       >
         <ChevronRight className="size-4" aria-hidden="true" />
