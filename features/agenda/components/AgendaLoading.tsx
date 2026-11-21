@@ -1,332 +1,342 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
+import { colors, gradients } from "@/lib/constants/colors";
 
-const CIRCUMFERENCE = 2 * Math.PI * 43;
-const PROGRESS_INTERVAL = 180;
+const TICKS = 60;
+const RADIUS = 46;
+const MAX_DURATION_MS = 10000;
+const REMOUNT_GRACE_MS = 2000;
 
-const RAY_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const STAGES = [
+  "Loading sessions",
+  "Loading halls",
+  "Loading speakers",
+  "Loading topics",
+];
 
-function generateRayId() {
-  const bytes = new Uint8Array(16);
-  window.crypto.getRandomValues(bytes);
+const r = (n: number) => Number(n.toFixed(3));
+const ease = (t: number) => 1 - Math.pow(1 - t, 1.8);
 
-  return Array.from(
-    bytes,
-    (byte) => RAY_CHARACTERS[byte % RAY_CHARACTERS.length]
-  ).join("");
-}
+let startedAt: number | null = null;
+let lastUnmountAt = 0;
 
-function SecurityIcon({
-  className = "size-7",
+export default function AgendaLoadingScreen({
+  duration = MAX_DURATION_MS,
 }: {
-  className?: string;
+  duration?: number;
 }) {
+  const total = Math.min(duration, MAX_DURATION_MS);
+  const [percentage, setPercentage] = useState(0);
+
+  useEffect(() => {
+    const now = Date.now();
+
+    if (startedAt === null || now - lastUnmountAt > REMOUNT_GRACE_MS) {
+      startedAt = now;
+    }
+
+    const update = () => {
+      const t = Math.min((Date.now() - (startedAt ?? now)) / total, 1);
+      setPercentage(Math.round(ease(t) * 100));
+      return t;
+    };
+
+    update();
+
+    const id = window.setInterval(() => {
+      if (update() >= 1) window.clearInterval(id);
+    }, 100);
+
+    return () => {
+      window.clearInterval(id);
+      lastUnmountAt = Date.now();
+    };
+  }, [total]);
+
+  const done = percentage >= 100;
+  const litTicks = Math.round((percentage / 100) * TICKS);
+
+  const stage = done
+    ? "Agenda ready"
+    : STAGES[Math.min(Math.floor(percentage / 25), STAGES.length - 1)];
+
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      aria-hidden="true"
+    <main
+      className="relative flex h-dvh w-full items-center justify-center overflow-hidden px-5"
+      style={{
+        background: gradients.obsidian,
+        color: colors.white[50],
+      }}
     >
-      <path
-        d="M12 3L19 6V11C19 15.5 16.1 19 12 21C7.9 19 5 15.5 5 11V6L12 3Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
+      {/* Ambient background lighting */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse at 50% 45%, color-mix(in srgb, ${colors.orange[400]} 12%, transparent), transparent 65%)`,
+        }}
       />
 
-      <path
-        d="M9 12L11 14L15 10"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      {/* Secondary ambient glow */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-50"
+        style={{
+          background: `radial-gradient(ellipse at 50% 100%, color-mix(in srgb, ${colors.orange[400]} 10%, transparent), transparent 55%)`,
+        }}
       />
-    </svg>
-  );
-}
 
-function CircularVerification({
-  percentage,
-}: {
-  percentage: number;
-}) {
-  const strokeOffset = CIRCUMFERENCE * (1 - percentage / 100);
+      {/* Decorative top light */}
+      <div
+        className="pointer-events-none absolute top-0 h-px w-full"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${colors.orange[400]}, transparent)`,
+          opacity: 0.35,
+        }}
+      />
 
-  return (
-    <div className="relative flex size-[130px] items-center justify-center">
-      <svg
-        viewBox="0 0 100 100"
-        className="absolute inset-0 size-full -rotate-90"
-      >
-        <circle
-          cx="50"
-          cy="50"
-          r="43"
-          fill="none"
-          stroke="#e8eef7"
-          strokeWidth="5"
-        />
+      {/* Main content */}
+      <div className="relative z-10 flex w-full max-w-md flex-col items-center">
+        {/* Brand */}
+        <div className="mb-8 flex flex-col items-center">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex size-10 items-center justify-center rounded-xl"
+              style={{
+                background: `linear-gradient(135deg, ${colors.orange[400]}, ${colors.orange[600]})`,
+                color: colors.white[50],
+                boxShadow: `0 0 30px color-mix(in srgb, ${colors.orange[400]} 20%, transparent)`,
+              }}
+            >
+              <span className="text-lg font-black">L</span>
+            </div>
 
-        <circle
-          cx="50"
-          cy="50"
-          r="43"
-          fill="none"
-          stroke="#2563eb"
-          strokeWidth="5"
-          strokeLinecap="round"
-          strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={strokeOffset}
-          className="checkpoint-circle"
-        />
-      </svg>
+            <span className="text-lg font-bold tracking-tight">
+              Live <span style={{ color: colors.orange[400] }}>Agenda</span>
+            </span>
+          </div>
 
-      <div className="relative flex flex-col items-center justify-center gap-1">
-        <SecurityIcon className="size-6 text-blue-600" />
-
-        <span className="text-[19px] font-bold tabular-nums text-slate-800">
-          {percentage}%
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function VerificationLoader({
-  percentage,
-}: {
-  percentage: number;
-}) {
-  return (
-    <div className="mt-9 rounded-xl border border-slate-200 bg-slate-50/80 p-5 sm:p-6">
-      {/* Circular progress */}
-      <div className="flex flex-col items-center text-center">
-        <CircularVerification percentage={percentage} />
-
-        <h2 className="mt-5 text-[15px] font-semibold text-slate-800">
-          {percentage === 100
-            ? "Loading completed"
-            : "Loading your agenda"}
-        </h2>
-
-        <p className="mt-2 max-w-[290px] text-xs leading-5 text-slate-500">
-          {percentage === 100
-            ? "Your loading animation has completed."
-            : "Please wait while we prepare your agenda and session details."}
-        </p>
-      </div>
-
-      {/* Horizontal progress */}
-      <div className="mt-7">
-        <div
-          className="relative h-[5px] w-full overflow-hidden rounded-full bg-slate-200"
-          role="progressbar"
-          aria-label="Loading progress"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={percentage}
-        >
+          {/* Brand separator */}
           <div
-            className="checkpoint-horizontal h-full rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500"
+            className="mt-5 h-px w-20"
             style={{
-              width: `${percentage}%`,
+              background: `linear-gradient(90deg, transparent, ${colors.orange[400]}, transparent)`,
             }}
           />
         </div>
-      </div>
 
-      {/* Status */}
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span
-            className={`size-1.5 rounded-full ${
-              percentage === 100
-                ? "bg-emerald-500"
-                : "animate-pulse bg-blue-500"
-            }`}
+        {/* Loader card */}
+        <div
+          className="relative flex w-full flex-col items-center rounded-3xl border px-6 py-8 sm:px-9 sm:py-10"
+          style={{
+            background: `color-mix(in srgb, ${colors.white[50]} 4%, transparent)`,
+            borderColor: `color-mix(in srgb, ${colors.orange[400]} 18%, transparent)`,
+            boxShadow: `0 25px 80px color-mix(in srgb, ${colors.slate[900]} 40%, transparent), 0 0 50px color-mix(in srgb, ${colors.orange[400]} 5%, transparent)`,
+            backdropFilter: "blur(18px)",
+          }}
+        >
+          {/* Card top accent */}
+          <div
+            className="absolute inset-x-10 top-0 h-px"
+            style={{
+              background: `linear-gradient(90deg, transparent, ${colors.orange[400]}, transparent)`,
+            }}
           />
 
-          <span className="text-[11px] font-medium text-slate-500">
-            {percentage === 100
-              ? "Loading completed"
-              : "Preparing agenda"}
-          </span>
-        </div>
+          {/* Heading */}
+          <div className="mb-8 text-center">
+            <p
+              className="mb-2 text-[10px] font-bold uppercase tracking-[0.35em]"
+              style={{ color: colors.orange[400] }}
+            >
+              Conference Experience
+            </p>
 
-        <span className="text-[11px] font-semibold tabular-nums text-blue-600">
-          {percentage}/100
-        </span>
-      </div>
-    </div>
-  );
-}
+            <h1 className="text-xl font-bold tracking-wide sm:text-2xl">
+              Conference Agenda
+            </h1>
 
-export default function AgendaLoadingScreen() {
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
-  const [percentage, setPercentage] = useState(1);
-  const [rayId, setRayId] = useState("0000000000000000");
+            <p
+              className="mt-2 text-xs tracking-wide"
+              style={{ color: colors.slate[400] }}
+            >
+              Preparing your event experience
+            </p>
+          </div>
 
-  // Generate Ray ID
-  useEffect(() => {
-    setRayId(generateRayId());
-  }, []);
+          {/* Circular progress */}
+          <div
+            className="relative aspect-square w-[min(240px,42vh,68vw)]"
+            role="progressbar"
+            aria-label="Loading agenda"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percentage}
+          >
+            <svg viewBox="0 0 100 100" className="absolute inset-0 size-full">
+              <defs>
+                <linearGradient
+                  id="agendaLoadingTickGradient"
+                  x1="0%"
+                  y1="100%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor={colors.orange[400]} />
+                  <stop offset="100%" stopColor={colors.orange[600]} />
+                </linearGradient>
+              </defs>
 
-  // Progress animation
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setPercentage((current) => {
-        if (current >= 100) {
-          window.clearInterval(interval);
-          return 100;
-        }
+              {/* Background ticks */}
+              {Array.from({ length: TICKS }, (_, i) => {
+                const angle = (i / TICKS) * 2 * Math.PI - Math.PI / 2;
+                const isHour = i % 5 === 0;
+                const inner = RADIUS - (isHour ? 7 : 4.5);
 
-        return current + 1;
-      });
-    }, PROGRESS_INTERVAL);
+                return (
+                  <line
+                    key={`bg-${i}`}
+                    x1={r(50 + Math.cos(angle) * inner)}
+                    y1={r(50 + Math.sin(angle) * inner)}
+                    x2={r(50 + Math.cos(angle) * RADIUS)}
+                    y2={r(50 + Math.sin(angle) * RADIUS)}
+                    strokeWidth={isHour ? 1.6 : 1}
+                    strokeLinecap="round"
+                    stroke={colors.slate[700]}
+                  />
+                );
+              })}
 
-    return () => window.clearInterval(interval);
-  }, []);
+              {/* Active ticks */}
+              {Array.from({ length: TICKS }, (_, i) => {
+                if (i >= litTicks) return null;
 
-  // Current year
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
+                const angle = (i / TICKS) * 2 * Math.PI - Math.PI / 2;
+                const isHour = i % 5 === 0;
+                const inner = RADIUS - (isHour ? 7 : 4.5);
+                const isHead = i === litTicks - 1 && !done;
 
-  return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f6f8fb] px-5 py-10 text-slate-900">
-      {/* Background */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,#ffffff_0%,#f6f8fb_75%)]" />
+                return (
+                  <line
+                    key={`active-${i}`}
+                    x1={r(50 + Math.cos(angle) * inner)}
+                    y1={r(50 + Math.sin(angle) * inner)}
+                    x2={r(50 + Math.cos(angle) * RADIUS)}
+                    y2={r(50 + Math.sin(angle) * RADIUS)}
+                    strokeWidth={isHour ? 1.9 : 1.3}
+                    strokeLinecap="round"
+                    stroke={isHead ? colors.white[50] : "url(#agendaLoadingTickGradient)"}
+                  />
+                );
+              })}
+            </svg>
 
-      {/* Main container */}
-      <section className="relative w-full max-w-[460px] animate-checkpoint-enter">
-        <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-[0_8px_40px_rgba(15,23,42,0.055)]">
-          {/* Top accent */}
-          <div className="h-[3px] w-full bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-400" />
-
-          <div className="p-7 sm:p-9">
-            {/* Brand */}
-            <div className="mb-9 flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-blue-600 text-xl font-bold text-white shadow-sm shadow-blue-200">
-                L
-              </div>
-
-              <div>
-                <h1 className="text-[17px] font-bold tracking-tight text-slate-900">
-                  Live Agenda
-                </h1>
-
-                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-slate-400">
-                  Agenda Workspace
-                </p>
-              </div>
-            </div>
-
-            {/* Heading */}
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1">
+            {/* Center percentage */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-5xl font-extrabold tabular-nums tracking-tighter">
+                {percentage}
                 <span
-                  className={`size-1.5 rounded-full ${
-                    percentage === 100
-                      ? "bg-emerald-500"
-                      : "animate-pulse bg-blue-600"
-                  }`}
-                />
-
-                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-700">
-                  Agenda Loading
+                  className="ml-0.5 text-xl font-bold"
+                  style={{ color: colors.orange[400] }}
+                >
+                  %
                 </span>
-              </div>
+              </span>
 
-              <h2 className="text-[26px] font-bold tracking-tight text-slate-900 sm:text-[29px]">
-                Preparing your agenda
-              </h2>
-
-              <p className="mt-3 text-[13px] leading-6 text-slate-500">
-                Loading sessions, halls, speakers, and topics.
-                Please wait while we prepare everything for you.
-              </p>
+              <span
+                className="mt-1 text-[9px] font-semibold uppercase tracking-[0.25em]"
+                style={{ color: colors.slate[400] }}
+              >
+                Loading
+              </span>
             </div>
+          </div>
 
-            {/* Loading animation */}
-            <VerificationLoader percentage={percentage} />
+          {/* Status */}
+          <div className="mt-7 flex min-h-6 items-center justify-center gap-2.5">
+            <span
+              className={`size-2 rounded-full ${
+                done ? "bg-emeremerald-500" : "animate-pulse"
+              }`}
+              style={!done ? { backgroundColor: colors.orange[400] } : undefined}
+            />
 
-            {/* Information */}
-            <div className="mt-7 border-t border-slate-100 pt-5">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                {/* Ray ID */}
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Ray ID
-                  </p>
+            <p
+              className="text-sm font-medium transition-all duration-300"
+              style={{ color: colors.slate[300] }}
+              aria-live="polite"
+            >
+              {stage}
+            </p>
+          </div>
 
-                  <p className="mt-1 font-mono text-[11px] font-medium tracking-[0.12em] text-slate-600">
-                    {rayId}
-                  </p>
-                </div>
+          {/* Linear progress */}
+          <div
+            className="mt-5 h-1 w-full overflow-hidden rounded-full"
+            style={{ backgroundColor: colors.slate[800] }}
+          >
+            <div
+              className="h-full rounded-full transition-[width] duration-200"
+              style={{
+                width: `${percentage}%`,
+                background: `linear-gradient(90deg, ${colors.orange[400]}, ${colors.orange[600]})`,
+                boxShadow: `0 0 12px color-mix(in srgb, ${colors.orange[400]} 35%, transparent)`,
+              }}
+            />
+          </div>
 
-                {/* Branding */}
-                <div className="flex items-center gap-2">
-                  <div className="flex size-8 items-center justify-center rounded-md bg-emerald-50">
-                    <SecurityIcon className="size-4 text-emerald-600" />
-                  </div>
+          {/* Progress details */}
+          <div className="mt-3 flex w-full items-center justify-between">
+            <span
+              className="text-[10px] font-medium"
+              style={{ color: colors.slate[500] }}
+            >
+              {done ? "Ready to explore" : "Please wait"}
+            </span>
 
-                  <div>
-                    <p className="text-[10px] font-medium text-slate-400">
-                      Powered by
-                    </p>
-
-                    <p className="text-xs font-semibold text-slate-700">
-                      Live Agenda
-                      <span className="text-blue-600">
-                        {" "}· SaaScraft
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <span
+              className="text-[10px] font-bold tabular-nums"
+              style={{ color: colors.orange[400] }}
+            >
+              {percentage} / 100
+            </span>
           </div>
         </div>
 
-        {/* Copyright */}
-        <p className="mt-5 text-center text-[11px] text-slate-400">
-          © {currentYear ?? ""} Live Agenda. All rights reserved.
-        </p>
-      </section>
+        {/* Footer */}
+        <div className="mt-7 flex flex-col items-center gap-2">
+          <p
+            className="text-[10px] font-medium uppercase tracking-[0.3em]"
+            style={{ color: colors.slate[500] }}
+          >
+            Powered by Live Agenda
+          </p>
 
-      {/* Animation styles */}
-      <style jsx global>{`
-        @keyframes checkpointEnter {
-          from {
-            opacity: 0;
-            transform: translateY(14px);
-          }
+          <div className="flex items-center gap-1.5">
+            <span
+              className="size-1 rounded-full"
+              style={{ backgroundColor: colors.orange[400] }}
+            />
+            <span
+              className="size-1 rounded-full opacity-50"
+              style={{ backgroundColor: colors.orange[400] }}
+            />
+            <span
+              className="size-1 rounded-full opacity-25"
+              style={{ backgroundColor: colors.orange[400] }}
+            />
+          </div>
+        </div>
+      </div>
 
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .checkpoint-circle {
-          transition: stroke-dashoffset 180ms linear;
-        }
-
-        .animate-checkpoint-enter {
-          animation: checkpointEnter 0.65s ease-out both;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .checkpoint-circle,
-          .animate-pulse,
-          .animate-checkpoint-enter {
-            animation: none !important;
-            transition: none !important;
-          }
-        }
-      `}</style>
+      {/* Bottom ambient accent */}
+      <div
+        className="pointer-events-none absolute bottom-0 h-px w-full"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${colors.orange[400]}, transparent)`,
+          opacity: 0.2,
+        }}
+      />
     </main>
   );
 }

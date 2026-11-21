@@ -34,7 +34,7 @@ import { AgendaEmptyState } from "./AgendaEmptyState";
 import { AgendaError } from "./AgendaError";
 import { AgendaFilters } from "./AgendaFilters";
 import { AgendaHeader } from "./AgendaHeader";
-import VerificationLoader  from "./AgendaLoading";
+import AgendaLoadingScreen  from "./AgendaLoading";
 import { AgendaProviders } from "./AgendaProviders";
 import { AgendaSchedule } from "./AgendaSchedule";
 import { AgendaSearch } from "./AgendaSearch";
@@ -309,7 +309,7 @@ const combinedHighlight = {
   /* ----------------------- strict initial loading ----------------------- */
 
 if (isLoading) {
-  return <VerificationLoader />;
+  return <AgendaLoadingScreen />;
 }
 
 /* -------------------------------- render -------------------------------- */
