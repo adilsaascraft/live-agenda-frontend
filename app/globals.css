@@ -73,6 +73,9 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+--background-image-gradient-primary: var(--gradient-primary);
+--background-image-gradient-hover: var(--gradient-hover);
 }
 
 /* ============================================
@@ -138,6 +141,21 @@
 
   /* Global radius */
   --radius: 0.625rem;
+
+  /* Premium Purple + Navy Gradient */
+--gradient-primary: linear-gradient(
+  135deg,
+  #6d28d9 0%,
+  #4c1d95 45%,
+  #172554 100%
+);
+
+--gradient-hover: linear-gradient(
+  135deg,
+  #5b21b6 0%,
+  #3b0764 45%,
+  #0f172a 100%
+);
 }
 
 /* ============================================

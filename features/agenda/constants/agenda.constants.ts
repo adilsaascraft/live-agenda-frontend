@@ -51,7 +51,7 @@ export const AGENDA_MAX_RETRIES = 2;
 export const SEARCH_DEBOUNCE_MS = 250;
 /** How often status badges re-evaluate. Only badges subscribe to this. */
 export const STATUS_TICK_MS = 30_000;
-export const SPEAKER_HIGHLIGHT_MS = 4_000;
+export const SPEAKER_HIGHLIGHT_MS = 60_000;
 
 export const AGENDA_TABS = [
   { value: "schedule", label: "Agenda Schedule" },
@@ -59,6 +59,7 @@ export const AGENDA_TABS = [
 ] as const;
 
 export type AgendaTabValue = (typeof AGENDA_TABS)[number]["value"];
+export type AgendaSheetMode = "saved" | "full";
 
 /* -------------------------------------------------------------------------- */
 /* Filters                                                                     */

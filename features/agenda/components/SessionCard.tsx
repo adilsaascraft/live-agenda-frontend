@@ -1,18 +1,29 @@
+
 "use client";
 
 import { memo } from "react";
-import { motion } from "framer-motion";
-import { CalendarDays, Clock, Layers, MapPin, UserRound } from "lucide-react";
-
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  CalendarDays,
+  Clock,
+  Layers,
+  MapPin,
+  Presentation,
+  UserRound,
+} from "lucide-react";
+import { SearchHighlightText } from "./SearchHighlightText";
+import { colors, gradients } from "@/lib/constants/colors";
 import { formatDate } from "@/features/dashboard/dashboard.utils";
 
 import type { AgendaSession, AgendaTopic } from "../types/agenda.types";
 import { getSessionElementId } from "../utils/agenda.utils";
 import { cx } from "../utils/cx";
 import { formatTimeRange } from "../utils/format.utils";
+import { getAgendaDateTime } from "../utils/agenda-date-time";
 import { useHighlight } from "./HighlightContext";
 import { PersonChip } from "./PersonChip";
 import { StatusBadge } from "./StatusBadge";
+import { AgendaCountdown } from "./AgendaCountdown";
 import { TopicCard } from "./TopicCard";
 
 interface SessionCardProps {
@@ -21,82 +32,239 @@ interface SessionCardProps {
   topics: readonly AgendaTopic[];
 }
 
-export const SessionCard = memo(function SessionCard({ session, topics }: SessionCardProps) {
+export const SessionCard = memo(function SessionCard({
+  session,
+  topics,
+}: SessionCardProps) {
   const elementId = getSessionElementId(session.id);
   const titleId = `${elementId}-title`;
-  const isTarget = useHighlight().elementId === elementId;
+
+  const {
+    elementId: highlightedElementId,
+    searchElementIds = [],
+  } = useHighlight();
+
+  const reduceMotion = useReducedMotion();
+
+  const isTarget =
+    highlightedElementId === elementId ||
+    searchElementIds.includes(elementId);
+
+  const sessionDateTime = getAgendaDateTime(
+    session.sessionDate,
+    session.startTime,
+    session.endTime,
+  );
 
   return (
     <motion.section
       id={elementId}
       aria-labelledby={titleId}
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       className="scroll-mt-24"
     >
-      <div
+      <motion.div
+        whileHover="hover"
+        initial="rest"
+        animate={
+  isTarget && !reduceMotion
+    ? {
+        borderColor: [
+          colors.zinc[700],
+          colors.zinc[900],
+          colors.zinc[700],
+        ],
+      }
+    : {
+        borderColor: isTarget
+          ? colors.zinc[900]
+          : colors.orange[200],
+      }
+}
+        transition={
+          isTarget && !reduceMotion
+            ? { duration: 1, repeat: Infinity, ease: "easeInOut" }
+            : { duration: 0.2 }
+        }
         className={cx(
-          "overflow-hidden rounded-2xl border border-l-4 border-l-primary bg-card shadow-sm transition-shadow duration-300",
-          isTarget && "ring-2 ring-primary/50 shadow-md",
+          "relative overflow-hidden rounded-xl border shadow-sm transition-all duration-200",
+          "hover:-translate-y-px hover:border-amber-300 hover:shadow-md",
         )}
+        style={{ background: gradients.goldenHour }}
       >
-        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-1.5">
-            <p className="flex items-center gap-2 text-2xl font-bold tracking-tight text-card-foreground">
-              <CalendarDays className="size-6 text-primary" aria-hidden="true" />
-              {formatDate(session.sessionDate)}
-            </p>
-            <p className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-              <Clock className="size-4" aria-hidden="true" />
-              {formatTimeRange(session.startTime, session.endTime)}
-            </p>
-          </div>
+        {/* Left accent */}
+        <motion.div
+          variants={{
+            rest: { background: gradients.forestGreen },
+            hover: { background: gradients.sunsetGold },
+          }}
+          transition={{ duration: 0.25 }}
+          className="absolute inset-y-0 left-0 z-10 w-1"
+          aria-hidden="true"
+        />
 
-          <div className="flex flex-col gap-2 sm:items-end">
-            <StatusBadge slot={session} />
+        <div className="space-y-3 p-3 pl-5 sm:p-4 sm:pl-6">
+          {/* Row 1: Date + status + countdown on left, hall on right */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2"
+                style={{
+                  backgroundColor: colors.zinc[900],
+                  color: colors.zinc[50],
+                }}
+              >
+                <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
+                <span className="text-sm font-bold tracking-wide">
+                  {formatDate(session.sessionDate)}
+                </span>
+              </div>
+
+              <StatusBadge slot={session} />
+
+              <AgendaCountdown
+                startAt={sessionDateTime.startAt}
+                endAt={sessionDateTime.endAt}
+              />
+            </div>
+
             {session.hall && (
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-muted px-3 py-1.5 text-sm font-medium">
-                <MapPin className="size-4 text-primary" aria-hidden="true" />
-                {session.hall.name}
-              </span>
-            )}
-            {session.track && (
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-muted px-3 py-1.5 text-sm font-medium">
-                <Layers className="size-4 text-primary" aria-hidden="true" />
-                {session.track.name}
+              <span
+                className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm font-semibold"
+                style={{
+                  backgroundColor: colors.orange[50],
+                  borderColor: colors.orange[200],
+                  color: colors.orange[900],
+                }}
+              >
+                <MapPin className="size-4 shrink-0" aria-hidden="true" />
+                <SearchHighlightText text={session.hall.name} />
               </span>
             )}
           </div>
-        </div>
 
-        <div className="space-y-3 border-t px-5 pb-5 pt-4">
-          <h3 id={titleId} className="text-xl font-bold leading-snug text-card-foreground">
-            {session.name}
+          {/* Row 2: Session time */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span
+              className="inline-flex items-center gap-1.5 text-sm font-semibold"
+              style={{ color: colors.slate[700] }}
+            >
+              <Clock
+                className="size-4 shrink-0"
+                style={{ color: colors.slate[600] }}
+                aria-hidden="true"
+              />
+              {formatTimeRange(session.startTime, session.endTime)}
+            </span>
+          </div>
+
+          {/* Row 3: Session name */}
+          <h3
+            id={titleId}
+            className="flex items-center gap-2 text-lg font-bold leading-snug tracking-tight text-zinc-800 sm:text-xl"
+          >
+            <Presentation className="size-5 shrink-0 text-zinc-500" />
+            <SearchHighlightText text={session.name} />
           </h3>
 
-          {session.chairpersons.length > 0 && (
-            <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-3">
-              <span className="shrink-0 text-xs font-semibold text-muted-foreground sm:w-36 sm:pt-1">
-                {session.chairpersons.length > 1 ? "Chairpersons" : "Chairperson"}
+          {/* Row 4: Track */}
+          {session.track && (
+            <div>
+              <span
+                className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm font-semibold"
+                style={{
+                  backgroundColor: colors.amber[50],
+                  borderColor: colors.amber[200],
+                  color: colors.amber[900],
+                }}
+              >
+                <Layers className="size-4 shrink-0" aria-hidden="true" />
+                <SearchHighlightText text={session.track.name} />
               </span>
-              <ul className="flex min-w-0 flex-wrap gap-1.5">
+            </div>
+          )}
+        </div>
+
+        {/* Divider + Chairpersons */}
+        <div
+          className="space-y-3 border-t px-3 py-3 pl-5 sm:px-4 sm:pl-6"
+          style={{ borderColor: colors.orange[200] }}
+        >
+          {session.chairpersons.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className="shrink-0 text-lg font-bold"
+                style={{ color: colors.zinc[900] }}
+              >
+                {session.chairpersons.length > 1
+                  ? "Chairpersons:"
+                  : "Chairperson:"}
+              </span>
+
+              {/* One shared background for all chairperson names */}
+              <ul className="flex min-w-0 flex-wrap items-center gap-2">
                 {session.chairpersons.map((person) => (
-                  <li key={person.id}>
-                    <PersonChip person={person} icon={UserRound} cardId={elementId} />
+                  <li
+                    key={person.id}
+                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-bold shadow-sm"
+                    style={{
+                      backgroundColor: colors.navy[900],
+                      color: colors.zinc[50],
+                    }}
+                  >
+                    <PersonChip
+                      person={person}
+                      icon={UserRound}
+                      cardId={elementId}
+                    />
                   </li>
                 ))}
               </ul>
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
+      {/* Session topics timeline */}
       {topics.length > 0 && (
-        <div className="relative ml-3 mt-3 space-y-3 border-l-2 border-primary/25 pl-4 sm:ml-8 sm:pl-6">
-          {topics.map((topic) => (
-            <TopicCard key={topic.id} topic={topic} />
-          ))}
+        <div className="relative ml-3 mt-5 sm:ml-8">
+          {/* Main vertical timeline */}
+          <div
+            className="absolute bottom-3 left-[9px] top-0 w-[2px] rounded-full"
+            style={{
+              background: `linear-gradient(to bottom, ${colors.orange[300]}, ${colors.amber[500]}, ${colors.orange[300]})`,
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Topics */}
+          <div className="space-y-4">
+            {topics.map((topic, index) => (
+              <div key={topic.id} className="relative pl-9">
+                {/* Topic Number Node */}
+                <div
+                  className="absolute left-0 top-0 z-10 flex size-7 -translate-y-1/2 items-center justify-center rounded-full border-2 text-[11px] font-extrabold tabular-nums shadow-md"
+                  style={{
+                    background: gradients.sunsetGold,
+                    borderColor: colors.orange[400],
+                    color: colors.zinc[900],
+                    boxShadow: `0 0 0 3px ${colors.orange[50]}`,
+                  }}
+                  aria-hidden="true"
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </div>
+
+                {/* Topic card */}
+                <TopicCard
+  topic={topic}
+  sessionDate={session.sessionDate}
+/>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </motion.section>

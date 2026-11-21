@@ -5,13 +5,30 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { SPEAKER_HIGHLIGHT_MS } from "../constants/agenda.constants";
 import type { AgendaModel, SpeakerAppearance } from "../types/agenda.types";
 
+export interface SearchPersonHighlight {
+  speakerId: string;
+  elementId: string;
+}
+
 export interface HighlightState {
   speakerId: string | null;
   /** DOM id of the card whose speaker chip should be highlighted. */
   elementId: string | null;
+
+  /** Multiple cards highlighted by schedule search. */
+  searchElementIds?: readonly string[];
+
+  /** Matching speaker chips, scoped to their parent card. */
+  searchPeople?: readonly SearchPersonHighlight[];
 }
 
-export const NO_HIGHLIGHT: HighlightState = { speakerId: null, elementId: null };
+export const NO_HIGHLIGHT: HighlightState = {
+  speakerId: null,
+  elementId: null,
+  searchElementIds: [],
+  searchPeople: [],
+};
+
 
 export interface ActiveSpeakerNav {
   speakerId: string;

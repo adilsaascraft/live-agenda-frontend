@@ -275,31 +275,47 @@ function sortOptions(options: SelectOption[]): SelectOption[] {
   return options.sort((a, b) => collator.compare(a.label, b.label));
 }
 
-function buildFilterOptions(sessions: readonly AgendaSession[]): AgendaFilterOptions {
+function buildFilterOptions(
+  sessions: readonly AgendaSession[],
+): AgendaFilterOptions {
   const dates = new Map<string, SelectOption>();
   const halls = new Map<string, SelectOption>();
   const tracks = new Map<string, SelectOption>();
   const extraTypes = new Set<string>();
 
+  let dayNumber = 0;
+
   for (const session of sessions) {
-    // Sessions are already chronological, so insertion order is date order.
+    // Sessions are already chronological.
+    // Assign a day number only once per unique session date.
     if (!dates.has(session.dateKey)) {
+      dayNumber += 1;
+
       dates.set(session.dateKey, {
         value: session.dateKey,
-        label: formatDate(session.sessionDate),
+        label: `Day ${dayNumber} : ${formatDate(session.sessionDate)}`,
       });
     }
+
     if (session.hall && !halls.has(session.hall.id)) {
-      halls.set(session.hall.id, { value: session.hall.id, label: session.hall.name });
+      halls.set(session.hall.id, {
+        value: session.hall.id,
+        label: session.hall.name,
+      });
     }
+
     if (session.track && !tracks.has(session.track.id)) {
       tracks.set(session.track.id, {
         value: session.track.id,
         label: session.track.name,
       });
     }
+
     for (const topic of session.topics) {
-      if (topic.type && !KNOWN_TOPIC_TYPES.some((t) => sameType(t, topic.type))) {
+      if (
+        topic.type &&
+        !KNOWN_TOPIC_TYPES.some((t) => sameType(t, topic.type))
+      ) {
         extraTypes.add(topic.type);
       }
     }
@@ -309,11 +325,18 @@ function buildFilterOptions(sessions: readonly AgendaSession[]): AgendaFilterOpt
     dates: [...dates.values()],
     halls: sortOptions([...halls.values()]),
     tracks: sortOptions([...tracks.values()]),
-    // The three specified types always; any other type present in the data is
-    // appended so no real topic is unreachable through the filter.
+
     topicTypes: [
-      ...KNOWN_TOPIC_TYPES.map((t) => ({ value: t, label: t })),
-      ...[...extraTypes].sort(collator.compare).map((t) => ({ value: t, label: t })),
+      ...KNOWN_TOPIC_TYPES.map((t) => ({
+        value: t,
+        label: t,
+      })),
+      ...[...extraTypes]
+        .sort(collator.compare)
+        .map((t) => ({
+          value: t,
+          label: t,
+        })),
     ],
   };
 }

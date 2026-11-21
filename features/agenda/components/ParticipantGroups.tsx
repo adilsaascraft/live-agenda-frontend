@@ -1,7 +1,16 @@
+
 "use client";
 
 import { useMemo } from "react";
-import { BadgeCheck, GraduationCap, Mic, Users, type LucideIcon } from "lucide-react";
+import {
+  BadgeCheck,
+  GraduationCap,
+  Mic,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+
+import { colors } from "@/lib/constants/colors";
 
 import type { AgendaTopic, ParticipantRole } from "../types/agenda.types";
 import { getTopicParticipantGroups } from "../utils/agenda.utils";
@@ -14,34 +23,75 @@ export const ROLE_ICONS: Record<ParticipantRole, LucideIcon> = {
   expertPanelist: BadgeCheck,
 };
 
+/** Premium dark role-specific backgrounds across all topic cards. */
+const ROLE_STYLES: Record<ParticipantRole, { backgroundColor: string }> = {
+  faculty: {
+    backgroundColor: colors.amber[900],
+  },
+  moderator: {
+    backgroundColor: colors.rose[900],
+  },
+  panelist: {
+    backgroundColor: colors.sky[900],
+  },
+  expertPanelist: {
+    backgroundColor: colors.lime[900],
+  },
+};
+
 interface ParticipantGroupsProps {
   topic: AgendaTopic;
   cardId: string;
 }
 
 /** Labelled participant rows. Roles with nobody assigned are omitted entirely. */
-export function ParticipantGroups({ topic, cardId }: ParticipantGroupsProps) {
+export function ParticipantGroups({
+  topic,
+  cardId,
+}: ParticipantGroupsProps) {
   const groups = useMemo(() => getTopicParticipantGroups(topic), [topic]);
+
   if (groups.length === 0) return null;
 
   return (
-    <dl className="mt-3 space-y-2">
-      {groups.map((group) => {
-        const Icon = ROLE_ICONS[group.role];
-        return (
-          <div key={group.role} className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-3">
-            <dt className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:w-36 sm:pt-1">
-              <Icon className="size-3.5" aria-hidden="true" />
-              {group.label}
-            </dt>
-            <dd className="flex min-w-0 flex-wrap gap-1.5">
-              {group.people.map((person) => (
-                <PersonChip key={person.id} person={person} icon={Icon} cardId={cardId} />
-              ))}
-            </dd>
-          </div>
-        );
-      })}
-    </dl>
+    
+<dl className="mt-3 space-y-2.5">
+  {groups.map((group) => {
+    const Icon = ROLE_ICONS[group.role];
+    const roleStyle = ROLE_STYLES[group.role];
+
+    return (
+      <div
+        key={group.role}
+        className="flex flex-wrap items-center gap-2"
+      >
+        <dt className="flex shrink-0 items-center gap-1.5 text-sm font-bold text-zinc-900">
+          <Icon className="size-4" aria-hidden="true" />
+          {group.label}:
+        </dt>
+
+        <dd className="flex min-w-0 flex-wrap items-center gap-2">
+          {group.people.map((person) => (
+            <span
+              key={person.id}
+              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-bold shadow-sm"
+              style={{
+                ...roleStyle,
+                color: colors.zinc[50],
+              }}
+            >
+              <PersonChip
+                person={person}
+                icon={Icon}
+                cardId={cardId}
+              />
+            </span>
+          ))}
+        </dd>
+      </div>
+    );
+  })}
+</dl>
+
   );
 }
