@@ -16,7 +16,7 @@ interface SpeakerNavigatorProps {
 }
 
 const iconButton =
-  "inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-white/15 active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400";
+  "inline-flex size-9 shrink-0 touch-manipulation items-center justify-center rounded-full transition-colors hover:bg-white/15 active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400";
 
 export function SpeakerNavigator({
   navigation,
@@ -38,8 +38,24 @@ export function SpeakerNavigator({
         borderColor: colors.zinc[700],
         color: colors.zinc[50],
         marginBottom: "env(safe-area-inset-bottom, 0px)",
+        touchAction: "manipulation",
       }}
     >
+      {/* Close button - top left */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close appearance navigator"
+        className={`${iconButton} absolute -left-2 -top-2 z-50 border`}
+        style={{
+          backgroundColor: colors.zinc[800],
+          borderColor: colors.zinc[700],
+          color: colors.orange[300],
+        }}
+      >
+        <X className="size-4" aria-hidden="true" />
+      </button>
+
       {/* Speaker name */}
       <span className="min-w-0 max-w-[180px] truncate text-sm font-semibold sm:max-w-[260px]">
         {navigation.fullName}
@@ -62,6 +78,7 @@ export function SpeakerNavigator({
         onClick={onPrevious}
         aria-label="Previous appearance"
         className={iconButton}
+        style={{ touchAction: "manipulation" }}
       >
         <ChevronLeft className="size-4" aria-hidden="true" />
       </button>
@@ -72,19 +89,9 @@ export function SpeakerNavigator({
         onClick={onNext}
         aria-label="Next appearance"
         className={iconButton}
+        style={{ touchAction: "manipulation" }}
       >
         <ChevronRight className="size-4" aria-hidden="true" />
-      </button>
-
-      {/* Close */}
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close appearance navigator"
-        className={iconButton}
-        style={{ color: colors.orange[300] }}
-      >
-        <X className="size-4" aria-hidden="true" />
       </button>
     </motion.div>
   );
