@@ -46,7 +46,7 @@ export function SpeakerNavigator({
         type="button"
         onClick={onClose}
         aria-label="Close appearance navigator"
-        className={`${iconButton} absolute -left-2 -top-4 z-[80]`}
+        className={`${iconButton} absolute -right-2 -top-6 z-[80]`}
         style={{
           backgroundColor: colors.zinc[800],
           border: `1px solid ${colors.zinc[700]}`,
