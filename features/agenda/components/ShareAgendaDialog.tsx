@@ -21,7 +21,7 @@ import {
 import { validateShareForm, type ShareFormErrors } from "../utils/share.utils";
 import { pluralize } from "../utils/format.utils";
 import { WhatsAppIcon } from "./WhatsAppIcon";
-import { AgendaSheetMode } from "../constants/agenda.constants";
+import type { AgendaSheetMode } from "../constants/agenda.constants";
 
 type ShareStatus =
   | { state: "idle" }
@@ -102,6 +102,7 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
           name: result.value.name,
           phone: result.value.phone,
           topicIds: [...topicIds],
+          mode,
         },
         current.signal,
       );
@@ -246,7 +247,7 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
                   aria-hidden="true"
                 />
                 <p className="text-xs font-semibold leading-relaxed text-emerald-700">
-                  Your agenda has been sent to {status.phone}.
+                  Your {isFullAgenda ? "full agenda" : "saved agenda"} has been accepted for WhatsApp delivery to {status.phone}.
                 </p>
               </div>
             )}

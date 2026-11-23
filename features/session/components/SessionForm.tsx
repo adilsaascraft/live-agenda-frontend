@@ -500,68 +500,68 @@ export function SessionForm({
         />
 
         {/* ----------------------------------------------------------------- */}
-        {/* Start Time and End Time                                          */}
-        {/* ----------------------------------------------------------------- */}
+{/* Start Time and End Time                                           */}
+{/* ----------------------------------------------------------------- */}
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="startTime"
-            render={({ field, fieldState }) => (
-              <FormItem>
-                <FormLabel id="session-start-time-label">
-                  Start Time
-                </FormLabel>
+<div className="grid grid-cols-2 gap-5">
+  <FormField
+    control={form.control}
+    name="startTime"
+    render={({ field, fieldState }) => (
+      <FormItem className="min-w-0">
+        <FormLabel id="session-start-time-label">
+          Start Time
+        </FormLabel>
 
-                <FormControl>
-                  <SessionTimePicker
-                    id="session-start-time"
-                    labelId="session-start-time-label"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    disabled={isPending}
-                    invalid={fieldState.invalid}
-                  />
-                </FormControl>
-
-                <p className="text-xs text-muted-foreground">
-                  Select the session start time.
-                </p>
-
-                <FormMessage />
-              </FormItem>
-            )}
+        <FormControl>
+          <SessionTimePicker
+            id="session-start-time"
+            labelId="session-start-time-label"
+            value={field.value ?? ""}
+            onChange={field.onChange}
+            disabled={isPending}
+            invalid={fieldState.invalid}
           />
+        </FormControl>
 
-          <FormField
-            control={form.control}
-            name="endTime"
-            render={({ field, fieldState }) => (
-              <FormItem>
-                <FormLabel id="session-end-time-label">
-                  End Time
-                </FormLabel>
+        <p className="text-xs text-muted-foreground">
+          Select the session start time.
+        </p>
 
-                <FormControl>
-                  <SessionTimePicker
-                    id="session-end-time"
-                    labelId="session-end-time-label"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    disabled={isPending}
-                    invalid={fieldState.invalid}
-                  />
-                </FormControl>
+        <FormMessage />
+      </FormItem>
+    )}
+  />
 
-                <p className="text-xs text-muted-foreground">
-                  Select the session end time.
-                </p>
+  <FormField
+    control={form.control}
+    name="endTime"
+    render={({ field, fieldState }) => (
+      <FormItem className="min-w-0">
+        <FormLabel id="session-end-time-label">
+          End Time
+        </FormLabel>
 
-                <FormMessage />
-              </FormItem>
-            )}
+        <FormControl>
+          <SessionTimePicker
+            id="session-end-time"
+            labelId="session-end-time-label"
+            value={field.value ?? ""}
+            onChange={field.onChange}
+            disabled={isPending}
+            invalid={fieldState.invalid}
           />
-        </div>
+        </FormControl>
+
+        <p className="text-xs text-muted-foreground">
+          Select the session end time.
+        </p>
+
+        <FormMessage />
+      </FormItem>
+    )}
+  />
+</div>
 
         {/* ----------------------------------------------------------------- */}
         {/* Chairpersons                                                     */}

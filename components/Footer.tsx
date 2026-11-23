@@ -41,7 +41,7 @@ export function Footer() {
               className="text-sm font-bold tracking-tight"
               style={{ color: colors.white[50] }}
             >
-              eagenda<span style={{ color: colors.orange[400] }}>.live</span>
+              eAgenda<span style={{ color: colors.orange[400] }}>.live</span>
             </span>
           </Link>
 
