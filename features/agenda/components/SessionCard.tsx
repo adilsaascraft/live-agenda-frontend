@@ -17,12 +17,10 @@ import { formatDate } from "@/features/dashboard/dashboard.utils";
 
 import type { AgendaSession, AgendaTopic } from "../types/agenda.types";
 import { getSessionElementId } from "../utils/agenda.utils";
-import { cx } from "../utils/cx";
 import { formatTimeRange } from "../utils/format.utils";
 import { getAgendaDateTime } from "../utils/agenda-date-time";
 import { useHighlight } from "./HighlightContext";
 import { PersonChip } from "./PersonChip";
-import { StatusBadge } from "./StatusBadge";
 import { AgendaCountdown } from "./AgendaCountdown";
 import { TopicCard } from "./TopicCard";
 
@@ -66,44 +64,36 @@ export const SessionCard = memo(function SessionCard({
       className="scroll-mt-24"
     >
       <motion.div
-        whileHover="hover"
-        initial="rest"
-        animate={
-  isTarget && !reduceMotion
-    ? {
-        borderColor: [
-          colors.zinc[700],
-          colors.zinc[900],
-          colors.zinc[700],
-        ],
-      }
-    : {
-        borderColor: isTarget
-          ? colors.zinc[900]
-          : colors.orange[200],
-      }
-}
-        transition={
-          isTarget && !reduceMotion
-            ? { duration: 1, repeat: Infinity, ease: "easeInOut" }
-            : { duration: 0.2 }
+  initial="rest"
+  animate={
+    isTarget && !reduceMotion
+      ? {
+          borderColor: [
+            colors.sky[900],
+            colors.zinc[900],
+            colors.sky[900],
+          ],
         }
-        className={cx(
-          "relative overflow-hidden rounded-xl border shadow-sm transition-all duration-200",
-          "hover:-translate-y-px hover:border-amber-300 hover:shadow-md",
-        )}
-        style={{ background: gradients.goldenHour }}
-      >
-        {/* Left accent */}
-        <motion.div
-          variants={{
-            rest: { background: gradients.forestGreen },
-            hover: { background: gradients.sunsetGold },
-          }}
-          transition={{ duration: 0.25 }}
-          className="absolute inset-y-0 left-0 z-10 w-1"
-          aria-hidden="true"
-        />
+      : {
+          borderColor: colors.rose[100],
+        }
+  }
+  transition={
+    isTarget && !reduceMotion
+      ? { duration: 1, repeat: Infinity, ease: "easeInOut" }
+      : { duration: 0.2 }
+  }
+  className="relative overflow-hidden rounded-xl border shadow-sm"
+  style={{
+    borderColor: colors.rose[100],
+  }}
+>
+        {/* Left accent - Always rose-900 */}
+<div
+  className="absolute inset-y-0 left-0 z-10 w-1"
+  style={{ backgroundColor: colors.rose[900] }}
+  aria-hidden="true"
+/>
 
         <div className="space-y-3 p-3 pl-5 sm:p-4 sm:pl-6">
           {/* Row 1: Date + status + countdown on left, hall on right */}
@@ -121,8 +111,6 @@ export const SessionCard = memo(function SessionCard({
                   {formatDate(session.sessionDate)}
                 </span>
               </div>
-
-              <StatusBadge slot={session} />
 
               <AgendaCountdown
                 startAt={sessionDateTime.startAt}
@@ -169,9 +157,9 @@ export const SessionCard = memo(function SessionCard({
             <SearchHighlightText text={session.name} />
           </h3>
 
-          {/* Row 4: Track */}
+          {/* Row 4: Track + track leaders (same look as chairpersons) */}
           {session.track && (
-            <div>
+            <div className="space-y-3">
               <span
                 className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm font-semibold"
                 style={{
@@ -183,6 +171,38 @@ export const SessionCard = memo(function SessionCard({
                 <Layers className="size-4 shrink-0" aria-hidden="true" />
                 <SearchHighlightText text={session.track.name} />
               </span>
+
+              {session.trackLeaders.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className="shrink-0 text-lg font-bold"
+                    style={{ color: colors.zinc[900] }}
+                  >
+                    {session.trackLeaders.length > 1
+                      ? "Track Leaders:"
+                      : "Track Leader:"}
+                  </span>
+
+                  <ul className="flex min-w-0 flex-wrap items-center gap-2">
+                    {session.trackLeaders.map((person) => (
+                      <li
+                        key={person.id}
+                        className="rounded-lg border border-zinc-200 px-3 py-2 text-sm font-bold shadow-sm"
+                        style={{
+                          backgroundColor: colors.navy[900],
+                          color: colors.zinc[50],
+                        }}
+                      >
+                        <PersonChip
+                          person={person}
+                          icon={UserRound}
+                          cardId={elementId}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -234,8 +254,8 @@ export const SessionCard = memo(function SessionCard({
           <div
             className="absolute bottom-3 left-[9px] top-0 w-[2px] rounded-full"
             style={{
-              background: `linear-gradient(to bottom, ${colors.orange[300]}, ${colors.amber[500]}, ${colors.orange[300]})`,
-            }}
+  background: gradients.primary,
+}}
             aria-hidden="true"
           />
 
@@ -247,10 +267,10 @@ export const SessionCard = memo(function SessionCard({
                 <div
                   className="absolute left-0 top-0 z-10 flex size-7 -translate-y-1/2 items-center justify-center rounded-full border-2 text-[11px] font-extrabold tabular-nums shadow-md"
                   style={{
-                    background: gradients.sunsetGold,
-                    borderColor: colors.orange[400],
-                    color: colors.zinc[900],
-                    boxShadow: `0 0 0 3px ${colors.orange[50]}`,
+                    background: gradients.primary,
+                    borderColor: gradients.primary,
+                    color: colors.white[50],
+                    boxShadow: `0 0 0 3px ${colors.rose[50]}`,
                   }}
                   aria-hidden="true"
                 >
@@ -261,6 +281,7 @@ export const SessionCard = memo(function SessionCard({
                 <TopicCard
   topic={topic}
   sessionDate={session.sessionDate}
+  topicIndex={index}
 />
               </div>
             ))}

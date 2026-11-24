@@ -64,14 +64,13 @@ export function AgendaSearch({
     <div
       className="group rounded-xl p-[1.5px] transition-shadow duration-200 focus-within:shadow-lg"
       style={{
-        background: gradients.royalPurple,
-        boxShadow: `0 0 0 0 ${colors.violet[100]}`,
+        background: gradients.primary,
       }}
     >
       <div
         className="relative overflow-hidden rounded-[10px] bg-background transition-colors"
         style={{
-          boxShadow: `inset 0 0 0 1px ${colors.violet[100]}`,
+          boxShadow: `inset 0 0 0 1px ${colors.sky[100]}`,
         }}
       >
         <Search

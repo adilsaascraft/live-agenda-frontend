@@ -50,8 +50,8 @@ export const SpeakerList = memo(function SpeakerList({
       <div
         className="flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3.5 py-2.5"
         style={{
-          backgroundColor: colors.purple[50],
-          borderColor: colors.purple[200],
+          backgroundColor: colors.sky[50],
+          borderColor: colors.sky[200],
         }}
         aria-live="polite"
       >
@@ -60,23 +60,23 @@ export const SpeakerList = memo(function SpeakerList({
             <div className="flex items-center gap-2">
               <Users
                 className="size-4 shrink-0"
-                style={{ color: colors.purple[700] }}
+                style={{ color: colors.sky[900] }}
               />
 
               <p
                 className="text-sm font-semibold"
-                style={{ color: colors.purple[900] }}
+                style={{ color: colors.sky[900] }}
               >
                 Showing{" "}
                 <span
                   className="font-bold"
-                  style={{ color: colors.purple[700] }}
+                  style={{ color: colors.sky[900] }}
                 >
                   {pluralize(filteredSpeakers.length, "faculty member")}
                 </span>
 
                 {hasQuery && (
-                  <span style={{ color: colors.purple[800] }}>
+                  <span style={{ color: colors.sky[900] }}>
                     {" "}of {speakers.length}
                   </span>
                 )}
@@ -85,7 +85,7 @@ export const SpeakerList = memo(function SpeakerList({
 
             <div
               className="flex items-center gap-1.5 text-xs font-medium"
-              style={{ color: colors.purple[700] }}
+              style={{ color: colors.sky[900] }}
             >
               <Search className="size-3.5 shrink-0" />
               <span>Select a faculty member to locate their sessions</span>

@@ -31,15 +31,15 @@ export const SpeakerCard = memo(function SpeakerCard({
       transition={{ type: "spring", stiffness: 400, damping: 26 }}
       className="group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border p-3.5 pl-5 text-left shadow-sm transition-shadow duration-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 sm:p-4 sm:pl-6"
       style={{
-        background: gradients.midnightPurple,
-        borderColor: colors.orange[200],
+        background: gradients.primary,
+        borderColor: colors.rose[900],
       }}
     >
       {/* Left accent */}
       <motion.span
         variants={{
-          rest: { background: gradients.sunsetGold },
-          hover: { background: gradients.forestGreen },
+          rest: { background: colors.rose[900] },
+          hover: { background: colors.rose[900] },
         }}
         initial="rest"
         className="absolute inset-y-0 left-0 z-10 w-1"

@@ -11,6 +11,7 @@ import {
   Printer,
   Tag,
   Trash2,
+  UserRound,
 } from "lucide-react";
 
 import { WhatsAppIcon } from "@/features/agenda/components/WhatsAppIcon";
@@ -39,9 +40,105 @@ interface FavoriteCardProps {
   onRemove: (topicId: string) => void;
 }
 
-function FavoriteCard({ lookup, mode, onRemove }: FavoriteCardProps) {
+interface AgendaPerson {
+  fullName: string;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function getString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim()
+    ? value
+    : undefined;
+}
+
+function getPeople(value: unknown): AgendaPerson[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((person) => {
+    const record = asRecord(person);
+    const fullName = getString(record?.fullName);
+
+    return fullName ? [{ fullName }] : [];
+  });
+}
+
+function PersonRow({
+  label,
+  people,
+}: {
+  label: string;
+  people: AgendaPerson[];
+}) {
+  if (people.length === 0) return null;
+
+  return (
+    <div className="flex items-start gap-2 text-xs text-muted-foreground">
+      <UserRound
+        className="mt-0.5 size-3.5 shrink-0"
+        aria-hidden="true"
+      />
+
+      <div className="min-w-0">
+        <span className="font-bold text-foreground">
+          {label}:{" "}
+        </span>
+
+        <span>
+          {people.map((person) => person.fullName).join(", ")}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function FavoriteCard({
+  lookup,
+  mode,
+  onRemove,
+}: FavoriteCardProps) {
   const { topic, session } = lookup;
   const canRemove = mode === "saved";
+
+  // Support both normalized frontend fields and populated API fields.
+  const sessionData = session as unknown as Record<string, unknown>;
+  const topicData = topic as unknown as Record<string, unknown>;
+
+  const trackData =
+    asRecord(sessionData.track) ??
+    asRecord(sessionData.trackId);
+
+  const hallData =
+    asRecord(sessionData.hall) ??
+    asRecord(sessionData.hallId);
+
+  const hallName =
+    getString(hallData?.name) ??
+    getString(hallData?.hallName);
+
+  const trackName =
+    getString(trackData?.name) ??
+    getString(trackData?.trackName);
+
+  const chairpersons = getPeople(
+    sessionData.chairpersons ?? sessionData.chairperson,
+  );
+
+  const trackLeaders = getPeople(
+    sessionData.trackLeaders ?? trackData?.trackLeaderIds,
+  );
+
+  const faculty = getPeople(
+    topicData.faculty ??
+    topicData.facultyMembers ??
+    topicData.facultyId,
+  );
 
   return (
     <motion.li
@@ -50,85 +147,21 @@ function FavoriteCard({ lookup, mode, onRemove }: FavoriteCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: 24 }}
       transition={{ duration: 0.2 }}
-      className="overflow-hidden rounded-2xl border-[1px] solid p-3 shadow-sm"
-      style={{
-        backgroundColor: colors.amber[100],
-        borderColor: colors.emerald[900],
-      }}
+      className="overflow-hidden rounded-2xl border shadow-sm"
+      style={{ borderColor: colors.rose[900] }}
     >
-      {/* Topic Header */}
+      {/* ================================================================ */}
+      {/* 1. SESSION DETAILS                                               */}
+      {/* ================================================================ */}
+
       <div
-        className="rounded-xl p-3 text-white shadow-sm"
-        style={{ background: gradients.royalPurple }}
+        className="space-y-3 p-3"
+        style={{ backgroundColor: colors.blue[50] }}
       >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-2.5">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
-              <BookOpen className="size-4" aria-hidden="true" />
-            </span>
-
-            <div className="min-w-0">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75">
-                Topic
-              </p>
-
-              <h3 className="text-sm font-semibold leading-snug text-white">
-                {topic.name}
-              </h3>
-            </div>
-          </div>
-
-          {canRemove && (
-            <button
-              type="button"
-              onClick={() => onRemove(topic.id)}
-              aria-label={`Remove “${topic.name}” from My Agenda`}
-              className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-rose-500/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            >
-              <Trash2 className="size-4" aria-hidden="true" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Topic Metadata */}
-      <div className="mt-2 flex flex-wrap gap-2 px-1">
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-          style={{
-            backgroundColor: colors.purple[100],
-            color: colors.purple[800],
-          }}
-        >
-          <Clock className="size-3.5" aria-hidden="true" />
-          {formatTimeRange(topic.startTime, topic.endTime)}
-        </span>
-
-        {topic.type && (
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-            style={{
-              backgroundColor: colors.orange[100],
-              color: colors.orange[800],
-            }}
-          >
-            <Tag className="size-3.5" aria-hidden="true" />
-            {topic.type}
-          </span>
-        )}
-      </div>
-
-      {/* Session Section */}
-      <div
-        className="mt-3 rounded-xl border p-3"
-        style={{
-          backgroundColor: colors.blue[50],
-          borderColor: `${colors.blue[200]}80`,
-        }}
-      >
+        {/* Session name */}
         <div className="flex items-start gap-2.5">
           <span
-            className="flex size-8 shrink-0 items-center justify-center rounded-lg"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg shadow-sm"
             style={{
               background: gradients.oceanBlue,
               color: colors.white[50],
@@ -140,57 +173,173 @@ function FavoriteCard({ lookup, mode, onRemove }: FavoriteCardProps) {
           <div className="min-w-0 flex-1">
             <p
               className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em]"
-style={{ color: colors.blue[700] }}
+              style={{ color: colors.blue[700] }}
             >
               Session
             </p>
 
-            <p className="text-sm font-semibold leading-snug text-foreground">
+            <p className="text-sm font-bold leading-snug text-foreground">
               {session.name}
             </p>
           </div>
         </div>
 
-        <div
-          className="mt-3 space-y-2 border-t pt-3"
+        {/* Row 1: Session date + session time */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3"
           style={{ borderColor: `${colors.blue[200]}80` }}
         >
-          <p className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
             <CalendarDays
               className="size-3.5 shrink-0"
               aria-hidden="true"
             />
             {formatDate(session.sessionDate)}
-          </p>
+          </span>
 
-          {session.hall && (
-            <p className="flex items-center gap-2 text-xs text-muted-foreground">
-              <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-              {session.hall.name}
-            </p>
-          )}
-
-          {session.track && (
-            <p className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Layers className="size-3.5 shrink-0" aria-hidden="true" />
-              {session.track.name}
-            </p>
-          )}
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock
+              className="size-3.5 shrink-0"
+              aria-hidden="true"
+            />
+            {formatTimeRange(session.startTime, session.endTime)}
+          </span>
         </div>
+
+        {/* Row 2: Hall + Track */}
+        {(hallName || trackName) && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {hallName && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                <MapPin
+                  className="size-3.5 shrink-0"
+                  aria-hidden="true"
+                />
+                {hallName}
+              </span>
+            )}
+
+            {trackName && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Layers
+                  className="size-3.5 shrink-0"
+                  aria-hidden="true"
+                />
+                {trackName}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Row 3: Chairpersons */}
+        <PersonRow
+          label={chairpersons.length > 1 ? "Chairpersons" : "Chairperson"}
+          people={chairpersons}
+        />
+
+        {/* Row 4: Track Leaders */}
+        <PersonRow
+          label={trackLeaders.length > 1 ? "Track Leaders" : "Track Leader"}
+          people={trackLeaders}
+        />
       </div>
 
-      {/* Participants Footer */}
+      {/* ================================================================ */}
+      {/* 2. TOPIC DETAILS                                                 */}
+      {/* ================================================================ */}
+
       <div
-        className="mt-3 rounded-xl border p-3"
+        className="space-y-3 border-t p-3"
         style={{
-          backgroundColor: colors.emerald[50],
-          borderColor: `${colors.emerald[200]}80`,
+          backgroundColor: colors.blue[50],
+          borderColor: colors.rose[100],
         }}
       >
-        <ParticipantGroups
-          topic={topic}
-          cardId={`favorite-${topic.id}`}
-        />
+        {/* Topic name - No background */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-2.5">
+            <span
+              className="flex size-8 shrink-0 items-center justify-center rounded-lg"
+              style={{
+                backgroundColor: colors.purple[100],
+                color: colors.purple[900],
+              }}
+            >
+              <BookOpen className="size-4" aria-hidden="true" />
+            </span>
+
+            <div className="min-w-0 flex-1">
+              <p
+                className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em]"
+                style={{ color: colors.purple[700] }}
+              >
+                Topic
+              </p>
+
+              <h3 className="text-sm font-bold leading-snug text-foreground">
+                {topic.name}
+              </h3>
+            </div>
+          </div>
+
+          {canRemove && (
+            <button
+              type="button"
+              onClick={() => onRemove(topic.id)}
+              aria-label={`Remove “${topic.name}” from My Agenda`}
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-zinc-200 text-zinc-600 transition-colors hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+            >
+              <Trash2 className="size-4" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+
+        {/* Topic metadata */}
+        <div className="flex flex-wrap gap-2">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+            style={{
+              backgroundColor: colors.purple[100],
+              color: colors.purple[800],
+            }}
+          >
+            <Clock className="size-3.5" aria-hidden="true" />
+            {formatTimeRange(topic.startTime, topic.endTime)}
+          </span>
+
+          {topic.type && (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+              style={{
+                backgroundColor: colors.orange[100],
+                color: colors.orange[800],
+              }}
+            >
+              <Tag className="size-3.5" aria-hidden="true" />
+              {topic.type}
+            </span>
+          )}
+        </div>
+
+        {/* Faculty - No background */}
+        <div
+          className="border-t pt-2.5"
+          style={{ borderColor: `${colors.blue[200]}80` }}
+        >
+          <PersonRow
+            label={faculty.length > 1 ? "Faculty" : "Faculty"}
+            people={faculty}
+          />
+        </div>
+
+        {/* Other topic participants */}
+        <div
+          className="rounded-xl border p-3"
+        >
+          <ParticipantGroups
+            topic={topic}
+            cardId={`favorite-${topic.id}`}
+          />
+        </div>
       </div>
     </motion.li>
   );
@@ -224,6 +373,7 @@ export function MyAgendaSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[500px] sm:w-[600px]">
+        {/* Header */}
         <SheetHeader
           className="border-b px-4 py-3 pr-14"
           style={{

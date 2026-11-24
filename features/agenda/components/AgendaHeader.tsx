@@ -34,8 +34,8 @@ export function AgendaHeader() {
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className="relative isolate max-h-[300px] overflow-hidden rounded-2xl border px-4 py-5 text-white shadow-xl sm:px-6 sm:py-7"
       style={{
-        background: gradients.royalPurple,
-        borderColor: `${colors.purple[300]}50`,
+        background: gradients.primary,
+        borderColor: `${colors.rose[900]}50`,
       }}
     >
       {/* Atmospheric background lighting */}

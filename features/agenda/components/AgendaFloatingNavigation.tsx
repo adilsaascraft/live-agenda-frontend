@@ -3,13 +3,13 @@
 
 import { memo, useCallback, useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Bookmark } from "lucide-react";
+import { gradients } from "@/lib/constants/colors";
 
 interface AgendaFloatingNavigationProps {
   onOpenMyAgenda: () => void;
 }
 
 const SECTION_SELECTOR = "[data-agenda-date-section]";
-
 const SCROLL_THRESHOLD = 120;
 
 const AgendaFloatingNavigation = memo(
@@ -45,19 +45,15 @@ const AgendaFloatingNavigation = memo(
       );
     }, []);
 
-    const scrollToSection = useCallback(
-      (section: HTMLElement) => {
-        section.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      },
-      [],
-    );
+    const scrollToSection = useCallback((section: HTMLElement) => {
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, []);
 
     const navigateDown = useCallback(() => {
       const sections = getDateSections();
-
       if (!sections.length) return;
 
       const scrollPosition = window.scrollY + 120;
@@ -80,10 +76,7 @@ const AgendaFloatingNavigation = memo(
       const sections = getDateSections();
 
       if (!sections.length) {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
 
@@ -101,10 +94,7 @@ const AgendaFloatingNavigation = memo(
       if (previousSection) {
         scrollToSection(previousSection);
       } else {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     }, [getDateSections, scrollToSection]);
 
@@ -129,100 +119,111 @@ const AgendaFloatingNavigation = memo(
       (scrollProgress / 100) * progressCircumference;
 
     return (
-  <div className="fixed bottom-5 right-4 z-50 flex flex-col items-end gap-2 sm:bottom-6 sm:right-6">
-    {/* My Saved Agenda */}
-    <button
-  type="button"
-  onClick={onOpenMyAgenda}
-  aria-label="Open my saved agenda"
-  className="group flex h-11 items-center gap-2 rounded-full border border-orange-200 bg-white px-5 text-sm font-bold text-orange-900 shadow-lg shadow-orange-900/10 transition-all hover:-translate-y-0.5 hover:border-orange-700 hover:bg-orange-700 hover:text-white active:scale-95 dark:border-orange-900/50 dark:bg-neutral-900 dark:text-orange-300 dark:hover:border-orange-700 dark:hover:bg-orange-700 dark:hover:text-white"
->
-  <Bookmark className="size-4 fill-orange-500/15 text-orange-600 transition-colors group-hover:fill-white group-hover:text-white" />
-  <span>My Agenda</span>
-</button>
+      <div className="fixed bottom-5 right-4 z-50 flex flex-col items-end gap-2 sm:bottom-6 sm:right-6">
 
-    {/* Scroll Navigation */}
-    {hasScrolled && (
-      <div className="flex flex-col items-center gap-2">
-        {/* Scroll Progress Circle */}
-        <div
-          className="relative flex size-13 items-center justify-center rounded-full border border-orange-200 bg-white shadow-lg dark:border-orange-900/50 dark:bg-neutral-900"
-          role="progressbar"
-          aria-label="Page scroll progress"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={scrollProgress}
-        >
-          <svg
-            className="absolute inset-0 size-full -rotate-90"
-            viewBox="0 0 40 40"
-            aria-hidden="true"
-          >
-            <circle
-              cx="20"
-              cy="20"
-              r={progressRadius}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              className="text-orange-100 dark:text-neutral-700"
-            />
-
-            <circle
-              cx="20"
-              cy="20"
-              r={progressRadius}
-              fill="none"
-              stroke="url(#agendaScrollGradient)"
-              strokeWidth="2.8"
-              strokeLinecap="round"
-              strokeDasharray={progressCircumference}
-              strokeDashoffset={progressOffset}
-              className="transition-[stroke-dashoffset] duration-200"
-            />
-
-            <defs>
-              <linearGradient
-                id="agendaScrollGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="100%"
-              >
-                <stop offset="0%" stopColor="#FB923C" />
-                <stop offset="50%" stopColor="#F97316" />
-                <stop offset="100%" stopColor="#D97706" />
-              </linearGradient>
-            </defs>
-          </svg>
-
-          <span className="relative text-xs font-extrabold tabular-nums text-orange-900 dark:text-orange-300">
-            {scrollProgress}%
-          </span>
-        </div>
-
-        {/* Navigation Arrow */}
+        {/* My Saved Agenda */}
         <button
           type="button"
-          onClick={isAtBottom ? navigateUp : navigateDown}
-          aria-label={
-            isAtBottom
-              ? "Navigate to previous agenda section"
-              : "Navigate to next agenda section"
-          }
-          title={isAtBottom ? "Previous section" : "Next section"}
-          className="flex size-13 items-center justify-center rounded-full border border-orange-200 bg-white text-orange-700 shadow-lg shadow-orange-900/10 transition-all hover:-translate-y-0.5 hover:border-orange-600 hover:bg-orange-100 hover:text-orange-900 active:scale-95 dark:border-orange-900/50 dark:bg-neutral-900 dark:text-orange-300 dark:hover:border-orange-700 dark:hover:bg-orange-950"
+          onClick={onOpenMyAgenda}
+          aria-label="Open my saved agenda"
+          className="group flex h-11 items-center gap-2 rounded-full border border-sky-200 bg-white px-5 text-sm font-bold text-sky-900 shadow-lg shadow-sky-900/10 transition-all duration-300 hover:-translate-y-0.5 hover:border-transparent hover:text-white hover:shadow-xl hover:shadow-sky-500/25 active:scale-95 dark:border-sky-900/50 dark:bg-neutral-900 dark:text-sky-300 dark:hover:text-white"
+          style={{
+            background: undefined,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = gradients.primary;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "";
+          }}
         >
-          {isAtBottom ? (
-            <ArrowUp className="size-5" />
-          ) : (
-            <ArrowDown className="size-5" />
-          )}
+          <Bookmark className="size-4 fill-sky-500/15 text-sky-600 transition-colors group-hover:fill-white group-hover:text-white" />
+          <span>My Agenda</span>
         </button>
+
+        {/* Scroll Navigation */}
+        {hasScrolled && (
+          <div className="flex flex-col items-center gap-2">
+
+            {/* Scroll Progress Circle */}
+            <div
+              className="relative flex size-13 items-center justify-center rounded-full border border-sky-200 bg-white shadow-lg dark:border-sky-900/50 dark:bg-neutral-900"
+              role="progressbar"
+              aria-label="Page scroll progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={scrollProgress}
+            >
+              <svg
+                className="absolute inset-0 size-full -rotate-90"
+                viewBox="0 0 40 40"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="20"
+                  cy="20"
+                  r={progressRadius}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  className="text-sky-100 dark:text-neutral-700"
+                />
+
+                <circle
+                  cx="20"
+                  cy="20"
+                  r={progressRadius}
+                  fill="none"
+                  stroke="url(#agendaScrollGradient)"
+                  strokeWidth="2.8"
+                  strokeLinecap="round"
+                  strokeDasharray={progressCircumference}
+                  strokeDashoffset={progressOffset}
+                  className="transition-[stroke-dashoffset] duration-200"
+                />
+
+                <defs>
+                  <linearGradient
+                    id="agendaScrollGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
+                    <stop offset="0%" stopColor="#7DD3FC" />
+                    <stop offset="50%" stopColor="#0EA5E9" />
+                    <stop offset="100%" stopColor="#0369A1" />
+                  </linearGradient>
+                </defs>
+              </svg>
+
+              <span className="relative text-xs font-extrabold tabular-nums text-sky-900 dark:text-sky-300">
+                {scrollProgress}%
+              </span>
+            </div>
+
+            {/* Navigation Arrow */}
+            <button
+              type="button"
+              onClick={isAtBottom ? navigateUp : navigateDown}
+              aria-label={
+                isAtBottom
+                  ? "Navigate to previous agenda section"
+                  : "Navigate to next agenda section"
+              }
+              title={isAtBottom ? "Previous section" : "Next section"}
+              className="flex size-13 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-lg shadow-sky-900/10 transition-all hover:-translate-y-0.5 hover:border-sky-600 hover:bg-sky-100 hover:text-sky-900 active:scale-95 dark:border-sky-900/50 dark:bg-neutral-900 dark:text-sky-300 dark:hover:border-sky-700 dark:hover:bg-sky-950"
+            >
+              {isAtBottom ? (
+                <ArrowUp className="size-5" />
+              ) : (
+                <ArrowDown className="size-5" />
+              )}
+            </button>
+          </div>
+        )}
       </div>
-    )}
-  </div>
-);
+    );
   },
 );
 

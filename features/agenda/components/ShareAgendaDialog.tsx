@@ -19,7 +19,6 @@ import {
   shareAgendaViaWhatsApp,
 } from "../services/agenda-share.service";
 import { validateShareForm, type ShareFormErrors } from "../utils/share.utils";
-import { pluralize } from "../utils/format.utils";
 import { WhatsAppIcon } from "./WhatsAppIcon";
 import type { AgendaSheetMode } from "../constants/agenda.constants";
 
@@ -29,13 +28,12 @@ type ShareStatus =
   | { state: "success"; phone: string }
   | { state: "error"; message: string };
 
-
 interface ShareAgendaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   topicIds: readonly string[];
   mode: AgendaSheetMode;
-}  
+}
 
 export function ShareAgendaDialog({
   open,
@@ -45,10 +43,15 @@ export function ShareAgendaDialog({
 }: ShareAgendaDialogProps) {
   const nameId = useId();
   const phoneId = useId();
+  const consentId = useId();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [confirmedPhone, setConfirmedPhone] = useState(false);
+
   const [errors, setErrors] = useState<ShareFormErrors>({});
+  const [consentError, setConsentError] = useState("");
+
   const [status, setStatus] = useState<ShareStatus>({ state: "idle" });
 
   const controller = useRef<AbortController | null>(null);
@@ -57,24 +60,75 @@ export function ShareAgendaDialog({
 
   const isFullAgenda = mode === "full";
 
-const dialogTitle = isFullAgenda
-  ? "Share Full Agenda"
-  : "Share My Agenda";
-
+  const dialogTitle = isFullAgenda
+    ? "Share Full Agenda"
+    : "Share My Agenda";
 
   const topicLabel = isFullAgenda ? "topics" : "saved topics";
 
-const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directly to your WhatsApp number.`;
+  const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directly to your WhatsApp number.`;
+
+  // ---------------------------------------------------------------------------
+  // Reactive field validation
+  // ---------------------------------------------------------------------------
+
+  const handleNameChange = (value: string) => {
+    setName(value);
+
+    // Validate again when the field already has an error.
+    if (errors.name || errors.phone) {
+      const result = validateShareForm({
+        name: value,
+        phone,
+      });
+
+      setErrors(result.ok ? {} : result.errors);
+    }
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
+
+    // Validate again when the field already has an error.
+    if (errors.name || errors.phone) {
+      const result = validateShareForm({
+        name,
+        phone: value,
+      });
+
+      setErrors(result.ok ? {} : result.errors);
+    }
+  };
+
+  const handleConsentChange = (checked: boolean) => {
+    setConfirmedPhone(checked);
+
+    // Immediately hide consent error when the checkbox is checked.
+    if (checked) {
+      setConsentError("");
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // Dialog
+  // ---------------------------------------------------------------------------
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
       controller.current?.abort();
+
       setErrors({});
+      setConsentError("");
+      setConfirmedPhone(false);
       setStatus({ state: "idle" });
     }
 
     onOpenChange(next);
   };
+
+  // ---------------------------------------------------------------------------
+  // Submit
+  // ---------------------------------------------------------------------------
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -83,12 +137,24 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
 
     const result = validateShareForm({ name, phone });
 
-    if (!result.ok) {
-      setErrors(result.errors);
+    setErrors(result.ok ? {} : result.errors);
+
+    // Required WhatsApp number confirmation.
+    if (!confirmedPhone) {
+      setConsentError(
+        "Please confirm that you own this number or have permission to receive the agenda on it."
+      );
+    } else {
+      setConsentError("");
+    }
+
+    // Both validations must pass.
+    if (!result.ok || !confirmedPhone) {
       return;
     }
 
     setErrors({});
+    setConsentError("");
     setStatus({ state: "loading" });
 
     controller.current?.abort();
@@ -107,7 +173,10 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
         current.signal,
       );
 
-      setStatus({ state: "success", phone: result.value.phone });
+      setStatus({
+        state: "success",
+        phone: result.value.phone,
+      });
     } catch (error) {
       if (current.signal.aborted) return;
 
@@ -129,40 +198,45 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
           background: colors.white[50],
         }}
       >
-        {/* Header */}
-       <DialogHeader
-  className="border-b px-5 py-3.5"
-  style={{
-    background: colors.purple[50],
-    borderColor: `${colors.purple[200]}60`,
-  }}
->
-  {/* Icon + Title on same row */}
-  <div className="flex items-center gap-3">
-    <span
-      className="flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-md"
-      style={{ background: gradients.emeraldLuxe }}
-    >
-      <WhatsAppIcon className="size-7" />
-    </span>
-    <DialogTitle className="text-base font-extrabold tracking-tight text-purple-950">{dialogTitle}</DialogTitle>
-  </div>
+        {/* ----------------------------------------------------------------- */}
+        {/* Header                                                              */}
+        {/* ----------------------------------------------------------------- */}
 
-  
+        <DialogHeader
+          className="border-b px-5 py-3.5"
+          style={{
+            background: colors.purple[50],
+            borderColor: `${colors.purple[200]}60`,
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span
+              className="flex size-10 shrink-0 items-center justify-center rounded-xl text-white shadow-md"
+              style={{ background: gradients.emeraldLuxe }}
+            >
+              <WhatsAppIcon className="size-7" />
+            </span>
 
-  {/* Description */}
-  <DialogDescription className="mt-1 text-xs font-medium leading-relaxed text-purple-700">
-    {description}
-  </DialogDescription>
-</DialogHeader>
+            <DialogTitle className="text-base font-extrabold tracking-tight text-purple-950">
+              {dialogTitle}
+            </DialogTitle>
+          </div>
 
-        {/* Form */}
+          <DialogDescription className="mt-1 text-xs font-medium leading-relaxed text-purple-700">
+            {description}
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* Form                                                                 */}
+        {/* ----------------------------------------------------------------- */}
+
         <form onSubmit={handleSubmit} noValidate className="space-y-4 p-5">
           {/* Name */}
           <div className="space-y-1.5">
             <label
               htmlFor={nameId}
-              className="text-xs font-bold text-purple-950"
+              className="text-sm font-bold text-purple-950"
             >
               Your name
             </label>
@@ -170,7 +244,7 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
             <Input
               id={nameId}
               value={name}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => handleNameChange(event.target.value)}
               autoComplete="name"
               placeholder="e.g. Dr. Anita Sharma"
               disabled={loading}
@@ -180,17 +254,20 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
             />
 
             {errors.name && (
-              <p id={`${nameId}-error`} className="text-xs font-medium text-destructive">
+              <p
+                id={`${nameId}-error`}
+                className="text-sm font-semibold text-destructive"
+              >
                 {errors.name}
               </p>
             )}
           </div>
 
-          {/* WhatsApp number */}
+          {/* WhatsApp Number */}
           <div className="space-y-1.5">
             <label
               htmlFor={phoneId}
-              className="text-xs font-bold text-purple-950"
+              className="text-sm font-bold text-purple-950"
             >
               WhatsApp mobile number
             </label>
@@ -200,7 +277,7 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
               type="tel"
               inputMode="tel"
               value={phone}
-              onChange={(event) => setPhone(event.target.value)}
+              onChange={(event) => handlePhoneChange(event.target.value)}
               autoComplete="tel"
               placeholder="98765 43210 or +44 7911 123456"
               disabled={loading}
@@ -209,24 +286,79 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
               className="h-11 rounded-xl border-purple-200 bg-white font-medium shadow-sm placeholder:text-zinc-400 focus-visible:border-purple-400 focus-visible:ring-purple-200"
             />
 
+            {/* Improved phone guidance */}
             <p
               id={`${phoneId}-hint`}
-              className="text-[11px] leading-relaxed text-zinc-500"
+              className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold leading-relaxed text-amber-800"
             >
-              Indian numbers work as they are. For other countries, include the country code.
+              <span className="font-extrabold">Note:</span>{" "}
+              Indian mobile numbers can be entered directly. For international
+              numbers, include the country code (e.g. +44, +1).
             </p>
 
             {errors.phone && (
               <p
                 id={`${phoneId}-error`}
-                className="text-xs font-medium text-destructive"
+                className="text-sm font-semibold text-destructive"
               >
                 {errors.phone}
               </p>
             )}
           </div>
 
-          {/* Status message */}
+          {/* ---------------------------------------------------------------- */}
+          {/* WhatsApp Number Confirmation                                      */}
+          {/* ---------------------------------------------------------------- */}
+
+          <div className="space-y-2">
+            <label
+              htmlFor={consentId}
+              className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-colors ${
+                consentError
+                  ? "border-red-300 bg-red-50"
+                  : "border-purple-200 bg-purple-50/70 hover:bg-purple-50"
+              }`}
+            >
+              <input
+                id={consentId}
+                type="checkbox"
+                checked={confirmedPhone}
+                onChange={(event) =>
+                  handleConsentChange(event.target.checked)
+                }
+                disabled={loading}
+                aria-invalid={consentError ? true : undefined}
+                aria-describedby={
+                  consentError ? `${consentId}-error` : undefined
+                }
+                className="mt-0.5 size-4 shrink-0 cursor-pointer accent-purple-700"
+              />
+
+              <span className="text-sm font-semibold leading-relaxed text-purple-950">
+                I confirm that this WhatsApp number belongs to me or that I have
+                permission to receive the agenda on this number.
+              </span>
+            </label>
+
+            {consentError && (
+              <p
+                id={`${consentId}-error`}
+                className="flex items-start gap-1.5 text-sm font-semibold text-red-600"
+                role="alert"
+              >
+                <TriangleAlert
+                  className="mt-0.5 size-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>{consentError}</span>
+              </p>
+            )}
+          </div>
+
+          {/* ---------------------------------------------------------------- */}
+          {/* Status Messages                                                    */}
+          {/* ---------------------------------------------------------------- */}
+
           <div role="status" aria-live="polite" className="min-h-0">
             {status.state === "error" && (
               <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3">
@@ -234,7 +366,8 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
                   className="mt-0.5 size-4 shrink-0 text-red-500"
                   aria-hidden="true"
                 />
-                <p className="text-xs font-semibold leading-relaxed text-red-700">
+
+                <p className="text-sm font-semibold leading-relaxed text-red-700">
                   {status.message}
                 </p>
               </div>
@@ -246,14 +379,19 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
                   className="mt-0.5 size-4 shrink-0 text-emerald-600"
                   aria-hidden="true"
                 />
-                <p className="text-xs font-semibold leading-relaxed text-emerald-700">
-                  Your {isFullAgenda ? "full agenda" : "saved agenda"} has been accepted for WhatsApp delivery to {status.phone}.
+
+                <p className="text-sm font-semibold leading-relaxed text-emerald-700">
+                  Your {isFullAgenda ? "full agenda" : "saved agenda"} has been
+                  accepted for WhatsApp delivery to {status.phone}.
                 </p>
               </div>
             )}
           </div>
 
-          {/* Actions */}
+          {/* ---------------------------------------------------------------- */}
+          {/* Actions                                                            */}
+          {/* ---------------------------------------------------------------- */}
+
           <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row">
             <Button
               type="button"
@@ -265,23 +403,23 @@ const description = `Send your ${topicIds.length} ${topicLabel} as a PDF directl
             </Button>
 
             <Button
-  type="submit"
-  disabled={loading || topicIds.length === 0}
-  className="h-12 flex-1 gap-2 border-0 font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-40"
-  style={{
-    background: gradients.emeraldLuxe,
-  }}
->
-  {loading ? (
-    <LoaderCircle className="size-5 shrink-0 animate-spin" />
-  ) : (
-    <WhatsAppIcon className="size-8 shrink-0" />
-  )}
+              type="submit"
+              disabled={loading || topicIds.length === 0}
+              className="h-12 flex-1 gap-2 border-0 font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-40"
+              style={{
+                background: gradients.emeraldLuxe,
+              }}
+            >
+              {loading ? (
+                <LoaderCircle className="size-5 shrink-0 animate-spin" />
+              ) : (
+                <WhatsAppIcon className="size-8 shrink-0" />
+              )}
 
-  <span className="whitespace-nowrap">
-    {loading ? "Sending…" : "Share on WhatsApp"}
-  </span>
-</Button>
+              <span className="whitespace-nowrap">
+                {loading ? "Sending…" : "Share on WhatsApp"}
+              </span>
+            </Button>
           </div>
         </form>
       </DialogContent>

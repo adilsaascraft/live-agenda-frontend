@@ -178,12 +178,12 @@ export function AgendaFilters({
                 className="h-11 gap-2 rounded-lg border-2 border-violet-600 bg-background px-4 font-semibold text-violet-700 shadow-sm transition-all duration-200 hover:border-violet-800 hover:text-white hover:shadow-md active:scale-[0.97]"
                 style={
                   {
-                    "--reset-hover-background": gradients.royalPurple,
+                    "--reset-hover-background": gradients.primary,
                   } as React.CSSProperties
                 }
                 onMouseEnter={(event) => {
                   event.currentTarget.style.background =
-                    gradients.royalPurple;
+                    gradients.primary;
                 }}
                 onMouseLeave={(event) => {
                   event.currentTarget.style.background = "transparent";

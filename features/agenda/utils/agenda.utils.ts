@@ -107,6 +107,11 @@ function toSession(raw: ApiTopic["sessionId"]): AgendaSession | null {
   const hall = toRef(raw.hallId, "hallName");
   const track = toRef(raw.trackId, "trackName");
   const chairpersons = toPersonList(raw.chairperson);
+  const trackLeaders = toPersonList(
+    raw.trackId && typeof raw.trackId === "object"
+      ? raw.trackId.trackLeaderIds
+      : undefined,
+  );
   const name = cleanString(raw.sessionName) || "Untitled session";
   const startTime = cleanString(raw.startTime);
   const endTime = cleanString(raw.endTime);
@@ -122,10 +127,17 @@ function toSession(raw: ApiTopic["sessionId"]): AgendaSession | null {
     endMinutes: parseTimeToMinutes(endTime),
     hall,
     track,
+    trackLeaders,
     chairpersons,
     topics: [],
     searchText: normalizeSearchText(
-      [name, hall?.name, track?.name, ...chairpersons.map((p) => p.fullName)]
+      [
+        name,
+        hall?.name,
+        track?.name,
+        ...trackLeaders.map((p) => p.fullName),
+        ...chairpersons.map((p) => p.fullName),
+      ]
         .filter(Boolean)
         .join(" "),
     ),
@@ -446,8 +458,13 @@ function buildSpeakers(sessions: readonly AgendaSession[]): AgendaSpeaker[] {
   };
 
   for (const session of sessions) {
-    // One appearance per session card where the person chairs.
-    for (const chair of session.chairpersons) {
+    // One appearance per session card where the person chairs or leads the
+    // track (a person holding both still gets a single appearance).
+    const sessionPeople = new Map<string, AgendaPerson>();
+    for (const person of [...session.chairpersons, ...session.trackLeaders]) {
+      if (!sessionPeople.has(person.id)) sessionPeople.set(person.id, person);
+    }
+    for (const chair of sessionPeople.values()) {
       entryFor(chair).appearances.push({
         kind: "session",
         key: `session:${session.id}`,

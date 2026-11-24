@@ -38,6 +38,12 @@ export interface ActiveSpeakerNav {
   total: number;
 }
 
+/**
+ * Fired when a navigation target is not in the DOM yet (e.g. its session
+ * accordion is collapsed) so the schedule can expand the owning session.
+ */
+export const AGENDA_REVEAL_EVENT = "agenda:reveal";
+
 const POLL_INTERVAL_MS = 50;
 const MAX_POLLS = 40; // ≈ 2s for the schedule tab / filters to render
 
@@ -90,6 +96,13 @@ export function useSpeakerNavigation({ model, prepare }: Options) {
             SPEAKER_HIGHLIGHT_MS,
           );
           return;
+        }
+        if (attempts === 0) {
+          window.dispatchEvent(
+            new CustomEvent<string>(AGENDA_REVEAL_EVENT, {
+              detail: appearance.elementId,
+            }),
+          );
         }
         attempts += 1;
         if (attempts < MAX_POLLS) pollTimer.current = setTimeout(attempt, POLL_INTERVAL_MS);

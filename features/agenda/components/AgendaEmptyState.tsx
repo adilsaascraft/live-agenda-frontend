@@ -99,8 +99,8 @@ export function AgendaEmptyState({
         transition={{ duration: 0.3, delay: 0.05 }}
         className="flex size-16 items-center justify-center rounded-2xl shadow-sm"
         style={{
-          background: gradients.pastelPurple,
-          color: colors.violet[700],
+          background: gradients.primary,
+          color: colors.sky[900],
         }}
       >
         <Icon className="size-7" strokeWidth={1.8} aria-hidden="true" />
@@ -125,7 +125,7 @@ export function AgendaEmptyState({
           onClick={onAction}
           className="mt-1 h-10 gap-2 rounded-lg border-2 px-5 font-semibold text-violet-700 shadow-sm transition-all duration-200 hover:border-violet-800 hover:text-white hover:shadow-md active:scale-[0.97]"
           onMouseEnter={(event) => {
-            event.currentTarget.style.background = gradients.royalPurple;
+            event.currentTarget.style.background = gradients.primary;
           }}
           onMouseLeave={(event) => {
             event.currentTarget.style.background = "transparent";

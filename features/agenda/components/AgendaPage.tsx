@@ -126,7 +126,7 @@ function AgendaExperience() {
       elementIds.add(sessionElementId);
 
       addMatchingPeople(
-        session.chairpersons,
+        [...session.trackLeaders, ...session.chairpersons],
         sessionElementId,
       );
     }
@@ -341,7 +341,7 @@ if (!model) {
 
         <p
   className="text-sm font-semibold"
-  style={{ color: colors.purple[900] }}
+  style={{ color: colors.sky[900] }}
   aria-live="polite"
 >
   {filtered.length > 0 ? (
@@ -349,12 +349,12 @@ if (!model) {
       Showing{" "}
       <span
         className="font-bold"
-        style={{ color: colors.purple[700] }}
+        style={{ color: colors.sky[900] }}
       >
         {pluralize(filtered.length, "session")}
       </span>
       {" · "}
-      <span style={{ color: colors.purple[800] }}>
+      <span style={{ color: colors.sky[900] }}>
         {pluralize(visibleTopicCount, "topic")}
       </span>
     </>
@@ -398,62 +398,63 @@ if (!model) {
             transition={{ duration: 0.45, delay: 0.15 }}
             className="mt-5 flex flex-col justify-center gap-3 sm:flex-row sm:gap-4"
           >
+    
             {/* Share Full Agenda */}
-            <motion.button
-              type="button"
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={openFullAgenda}
-              className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-purple-200 bg-white px-7 text-sm font-bold text-purple-700 shadow-sm transition-all duration-200 hover:border-purple-400 hover:bg-purple-50 hover:shadow-lg hover:shadow-purple-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 sm:w-auto sm:min-w-56"
-            >
-              <span className="flex size-9 items-center justify-center rounded-xl bg-purple-100 transition-colors group-hover:bg-purple-200">
-                <Share2
-                  className="size-5 transition-transform duration-200 group-hover:rotate-12"
-                  aria-hidden="true"
-                />
-              </span>
+<motion.button
+  type="button"
+  whileHover={{ y: -3, scale: 1.02 }}
+  whileTap={{ scale: 0.97 }}
+  onClick={openFullAgenda}
+  className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-sky-200 bg-white px-7 text-sm font-bold text-sky-700 shadow-sm transition-all duration-200 hover:border-sky-400 hover:bg-sky-50 hover:shadow-lg hover:shadow-sky-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 sm:w-auto sm:min-w-56"
+>
+  <span className="flex size-9 items-center justify-center rounded-xl bg-sky-100 transition-colors group-hover:bg-sky-200">
+    <Share2
+      className="size-5 transition-transform duration-200 group-hover:rotate-12"
+      aria-hidden="true"
+    />
+  </span>
 
-              <span>Share Full Agenda</span>
-            </motion.button>
+  <span>Share Full Agenda</span>
+</motion.button>
 
             {/* My Saved Agenda */}
-            <motion.button
-              type="button"
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={openSavedAgenda}
-              aria-label={`My Saved Agenda, ${favoriteCount} saved ${favoriteCount === 1 ? "topic" : "topics"}`}
-              className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-purple-600 px-7 text-sm font-bold text-white shadow-md transition-all duration-200 hover:shadow-lg hover:shadow-purple-300/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 sm:w-auto sm:min-w-56"
-              style={{ background: gradients.royalPurple }}
-            >
-              <span className="flex size-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 transition-colors group-hover:bg-white/20">
-                <BookmarkCheck
-                  className="size-5 transition-transform duration-200 group-hover:scale-110"
-                  aria-hidden="true"
-                />
-              </span>
+<motion.button
+  type="button"
+  whileHover={{ y: -3, scale: 1.02 }}
+  whileTap={{ scale: 0.97 }}
+  onClick={openSavedAgenda}
+  aria-label={`My Saved Agenda, ${favoriteCount} saved ${favoriteCount === 1 ? "topic" : "topics"}`}
+  className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-sky-600 px-7 text-sm font-bold text-white shadow-md transition-all duration-200 hover:shadow-lg hover:shadow-sky-300/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 sm:w-auto sm:min-w-56"
+  style={{ background: gradients.primary }}
+>
+  <span className="flex size-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 transition-colors group-hover:bg-white/20">
+    <BookmarkCheck
+      className="size-5 transition-transform duration-200 group-hover:scale-110"
+      aria-hidden="true"
+    />
+  </span>
 
-              <span>My Saved Agenda</span>
+  <span>My Saved Agenda</span>
 
-              <motion.span
-                key={favoriteCount}
-                initial={{ scale: 0.7, opacity: 0.5 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 18,
-                }}
-                className="inline-flex min-w-7 items-center justify-center rounded-full border border-white/30 bg-white/20 px-2 py-1 text-xs font-extrabold text-white"
-              >
-                {favoriteCount}
-              </motion.span>
-            </motion.button>
+  <motion.span
+    key={favoriteCount}
+    initial={{ scale: 0.7, opacity: 0.5 }}
+    animate={{ scale: 1, opacity: 1 }}
+    transition={{
+      type: "spring",
+      stiffness: 500,
+      damping: 18,
+    }}
+    className="inline-flex min-w-7 items-center justify-center rounded-full border border-white/30 bg-white/20 px-2 py-1 text-xs font-extrabold text-white"
+  >
+    {favoriteCount}
+  </motion.span>
+</motion.button>
           </motion.div>
 
 
           {/* Animated agenda guidance */}
-<div className="mt-4 overflow-hidden rounded-xl border border-purple-100 bg-purple-50/70 py-3">
+{/* <div className="mt-4 overflow-hidden rounded-xl border border-purple-100 bg-purple-50/70 py-3">
   <motion.div
     className="flex w-max items-center gap-10 whitespace-nowrap"
     animate={{ x: ["0%", "-50%"] }}
@@ -491,7 +492,7 @@ if (!model) {
       </div>
     ))}
   </motion.div>
-</div>
+</div> */}
 
           <div className="mt-6 space-y-5">
             <AgendaTabs

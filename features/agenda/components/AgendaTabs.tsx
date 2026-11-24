@@ -91,7 +91,7 @@ export function AgendaTabs({ value, onValueChange }: AgendaTabsProps) {
               <motion.span
                 layoutId="agenda-tab-indicator"
                 className="absolute inset-0 rounded-lg shadow-md"
-                style={{ background: gradients.royalPurple }}
+                style={{ background: gradients.primary }}
                 transition={{
                   type: "spring",
                   stiffness: 500,

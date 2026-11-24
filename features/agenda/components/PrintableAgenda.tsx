@@ -11,8 +11,8 @@ import {
   Heart,
   Layers,
   MapPin,
-  Presentation,
   Tag,
+  UserRound,
 } from "lucide-react";
 
 import { formatDate, formatNow } from "@/features/dashboard/dashboard.utils";
@@ -129,129 +129,125 @@ const PRINT_CSS = `
     font-weight: 500;
   }
 
-  /* Session */
+  /* Session - aligned with the My Agenda sheet */
   #${PRINT_ROOT_ID} .pa-session {
     margin-bottom: 7mm;
-    border: 1px solid #fed7aa;
+    border: 1px solid #881337;
     border-radius: 4mm;
     overflow: hidden;
-    background: #fff7ed !important;
+    background: #eff6ff !important;
     page-break-inside: auto;
     break-inside: auto;
   }
 
   #${PRINT_ROOT_ID} .pa-session-top {
     padding: 4mm;
-    background: #ffedd5 !important;
-    border-bottom: 1px solid #fdba74;
+    background: #eff6ff !important;
   }
 
-  #${PRINT_ROOT_ID} .pa-session-meta {
+  #${PRINT_ROOT_ID} .pa-session-heading {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 2mm;
+    align-items: flex-start;
+    gap: 2.5mm;
     margin-bottom: 3mm;
   }
 
-  #${PRINT_ROOT_ID} .pa-session-date {
+  #${PRINT_ROOT_ID} .pa-session-icon {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
-    gap: 1.5mm;
+    justify-content: center;
+    width: 8mm;
+    height: 8mm;
     border-radius: 2mm;
-    padding: 2mm 3mm;
-    background: #18181b !important;
     color: #ffffff !important;
-    font-size: 8pt;
-    font-weight: 700;
+    background: #2563eb !important;
   }
 
-  #${PRINT_ROOT_ID} .pa-session-hall {
-    display: inline-flex;
-    align-items: center;
-    gap: 1.5mm;
-    border: 1px solid #fdba74;
-    border-radius: 2mm;
-    padding: 1.5mm 3mm;
-    background: #fff7ed !important;
-    color: #9a3412 !important;
+  #${PRINT_ROOT_ID} .pa-session-eyebrow {
+    margin-bottom: 1mm !important;
+    color: #1d4ed8;
+    font-size: 7pt;
     font-weight: 700;
-    font-size: 8pt;
-  }
-
-  #${PRINT_ROOT_ID} .pa-session-time {
-    display: flex;
-    align-items: center;
-    gap: 1.5mm;
-    color: #475569;
-    font-size: 8.5pt;
-    font-weight: 700;
-  }
-
-  #${PRINT_ROOT_ID} .pa-session-track {
-    display: inline-flex;
-    align-items: center;
-    gap: 1.5mm;
-    border: 1px solid #fcd34d;
-    border-radius: 2mm;
-    padding: 1.5mm 3mm;
-    background: #fffbeb !important;
-    color: #92400e !important;
-    font-size: 8pt;
-    font-weight: 700;
+    letter-spacing: 1pt;
+    text-transform: uppercase;
   }
 
   #${PRINT_ROOT_ID} .pa-session-title {
-    display: flex;
-    align-items: flex-start;
-    gap: 2mm;
+    display: block;
     margin: 0;
-    padding: 4mm;
-    color: #27272a;
-    font-size: 13pt;
+    padding: 0;
+    color: #172554;
+    font-size: 12pt;
     font-weight: 800;
     line-height: 1.35;
   }
 
-  #${PRINT_ROOT_ID} .pa-chairpersons {
-    border-top: 1px solid #fdba74;
-    padding: 3mm 4mm;
-    background: #ffedd5 !important;
-  }
-
-  #${PRINT_ROOT_ID} .pa-chair-label {
-    font-weight: 800;
-    margin-right: 2mm;
-  }
-
-  #${PRINT_ROOT_ID} .pa-chair-list {
+  #${PRINT_ROOT_ID} .pa-session-meta-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5mm;
-    margin-top: 2mm;
+    align-items: center;
+    gap: 2mm 5mm;
+    border-top: 1px solid rgba(147, 197, 253, 0.55);
+    padding-top: 2.5mm;
+    margin-top: 2.5mm;
   }
 
-  #${PRINT_ROOT_ID} .pa-chair {
-    border-radius: 2mm;
-    padding: 1.5mm 3mm;
-    background: #172554 !important;
-    color: #ffffff !important;
+  #${PRINT_ROOT_ID} .pa-session-date,
+  #${PRINT_ROOT_ID} .pa-session-time,
+  #${PRINT_ROOT_ID} .pa-session-hall,
+  #${PRINT_ROOT_ID} .pa-session-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5mm;
+    color: #475569;
     font-size: 8pt;
-    font-weight: 700;
+    font-weight: 600;
+  }
+
+  #${PRINT_ROOT_ID} .pa-session-hall {
+    color: #1e40af;
+  }
+
+  #${PRINT_ROOT_ID} .pa-session-track {
+    color: #1e3a8a;
+  }
+
+  #${PRINT_ROOT_ID} .pa-person-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 2mm;
+    border-top: 1px solid rgba(147, 197, 253, 0.55);
+    padding: 2.5mm 4mm;
+    background: #eff6ff !important;
+    color: #475569;
+    font-size: 8pt;
+  }
+
+  #${PRINT_ROOT_ID} .pa-person-label {
+    flex: 0 0 auto;
+    color: #172554;
+    font-weight: 800;
+  }
+
+  #${PRINT_ROOT_ID} .pa-person-names {
+    min-width: 0;
+    font-weight: 500;
   }
 
   /* Topic */
   #${PRINT_ROOT_ID} .pa-topics {
     padding: 3mm;
+    background: #eff6ff !important;
   }
 
   #${PRINT_ROOT_ID} .pa-topic {
     position: relative;
     margin-bottom: 3mm;
-    border: 1px solid #99f6e4;
+    border: 1px solid #c7d2fe;
     border-radius: 3mm;
     padding: 3.5mm;
-    background: #ccfbf1 !important;
+    background: #eff6ff !important;
     page-break-inside: avoid;
     break-inside: avoid;
   }
@@ -272,13 +268,30 @@ const PRINT_CSS = `
     margin-bottom: 2mm;
   }
 
-  #${PRINT_ROOT_ID} .pa-topic-title {
+  #${PRINT_ROOT_ID} .pa-topic-title-row {
     display: flex;
     align-items: flex-start;
     gap: 2mm;
     margin: 0 0 2mm;
+  }
+
+  #${PRINT_ROOT_ID} .pa-topic-title-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 7mm;
+    height: 7mm;
+    border-radius: 2mm;
+    background: #f3e8ff !important;
+    color: #6b21a8 !important;
+  }
+
+  #${PRINT_ROOT_ID} .pa-topic-title {
+    margin: 0;
+    padding: 0;
     color: #172554;
-    font-size: 11pt;
+    font-size: 10pt;
     font-weight: 800;
     line-height: 1.4;
   }
@@ -293,9 +306,9 @@ const PRINT_CSS = `
   }
 
   #${PRINT_ROOT_ID} .pa-topic-participants {
-    border-top: 1px solid #99f6e4;
+    border-top: 1px solid rgba(147, 197, 253, 0.55);
     margin-top: 3mm;
-    padding-top: 3mm;
+    padding-top: 2.5mm;
   }
 
   /* Footer */
@@ -388,6 +401,51 @@ const DEFAULT_TOPIC_STYLE = {
   color: colors.slate[700],
 };
 
+interface PrintablePerson {
+  id?: string;
+  fullName: string;
+}
+
+function getPrintablePeople(value: unknown): PrintablePerson[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (typeof item !== "object" || item === null) return [];
+    const person = item as Record<string, unknown>;
+    const fullName =
+      typeof person.fullName === "string" && person.fullName.trim()
+        ? person.fullName.trim()
+        : undefined;
+
+    return fullName
+      ? [{
+          id: typeof person.id === "string" ? person.id : undefined,
+          fullName,
+        }]
+      : [];
+  });
+}
+
+function PrintablePersonRow({
+  label,
+  people,
+}: {
+  label: string;
+  people: PrintablePerson[];
+}) {
+  if (people.length === 0) return null;
+
+  return (
+    <div className="pa-person-row">
+      <UserRound size={13} style={{ color: "#64748b", flexShrink: 0 }} />
+      <span className="pa-person-label">{label}:</span>
+      <span className="pa-person-names">
+        {people.map((person) => person.fullName).join(", ")}
+      </span>
+    </div>
+  );
+}
+
 function PrintableTopic({
   topic,
 }: {
@@ -395,6 +453,10 @@ function PrintableTopic({
 }) {
   const typeStyle = TOPIC_TYPE_STYLES[topic.type ?? ""] ?? DEFAULT_TOPIC_STYLE;
   const groups = getTopicParticipantGroups(topic);
+  const topicData = topic as unknown as Record<string, unknown>;
+  const faculty = getPrintablePeople(
+    topicData.faculty ?? topicData.facultyMembers ?? topicData.facultyId,
+  );
 
   return (
     <article className="pa-topic">
@@ -412,18 +474,21 @@ function PrintableTopic({
         </div>
       )}
 
-      <h3 className="pa-topic-title">
-        <FileText
-          size={17}
-          style={{ color: colors.slate[600], flexShrink: 0 }}
-        />
-        {topic.name}
-      </h3>
+      {/* Topic title stays on the card surface; no separate title background. */}
+      <div className="pa-topic-title-row">
+        <span className="pa-topic-title-icon">
+          <FileText size={15} />
+        </span>
+        <h3 className="pa-topic-title">{topic.name}</h3>
+      </div>
 
       <p className="pa-topic-time">
         <Clock size={13} style={{ color: colors.amber[700] }} />
         {formatTimeRange(topic.startTime, topic.endTime)}
       </p>
+
+      {/* Faculty uses the same plain, unboxed treatment as session people. */}
+      <PrintablePersonRow label="Faculty" people={faculty} />
 
       {groups.length > 0 && (
         <div className="pa-topic-participants">
@@ -446,64 +511,60 @@ function PrintableSession({
 }) {
   return (
     <section className="pa-session">
-      {/* Session metadata */}
+      {/* Session name */}
       <div className="pa-session-top">
-        <div className="pa-session-meta">
+        <div className="pa-session-heading">
+          <span className="pa-session-icon">
+            <Layers size={16} />
+          </span>
+          <div>
+            <p className="pa-session-eyebrow">Session</p>
+            <h2 className="pa-session-title">{session.name}</h2>
+          </div>
+        </div>
+
+        {/* Row 1: Date + time */}
+        <div className="pa-session-meta-row">
           <span className="pa-session-date">
             <CalendarDays size={13} />
             {formatDate(session.sessionDate)}
           </span>
-
-          {session.hall && (
-            <span className="pa-session-hall">
-              <MapPin size={12} />
-              {session.hall.name}
-            </span>
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="pa-session-time">
+          <span className="pa-session-time">
             <Clock size={13} />
             {formatTimeRange(session.startTime, session.endTime)}
-          </p>
-
-          {session.track && (
-            <span className="pa-session-track">
-              <Layers size={12} />
-              {session.track.name}
-            </span>
-          )}
+          </span>
         </div>
+
+        {/* Row 2: Hall + track */}
+        {(session.hall || session.track) && (
+          <div className="pa-session-meta-row">
+            {session.hall && (
+              <span className="pa-session-hall">
+                <MapPin size={12} />
+                {session.hall.name}
+              </span>
+            )}
+            {session.track && (
+              <span className="pa-session-track">
+                <Layers size={12} />
+                {session.track.name}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Session title */}
-      <h2 className="pa-session-title">
-        <Presentation
-          size={19}
-          style={{ color: colors.zinc[500], flexShrink: 0 }}
-        />
-        {session.name}
-      </h2>
+      {/* Row 3: Chairpersons */}
+      <PrintablePersonRow
+        label={session.chairpersons.length > 1 ? "Chairpersons" : "Chairperson"}
+        people={session.chairpersons}
+      />
 
-      {/* Chairpersons */}
-      {session.chairpersons.length > 0 && (
-        <div className="pa-chairpersons">
-          <p className="pa-chair-label">
-            {session.chairpersons.length > 1
-              ? "Chairpersons"
-              : "Chairperson"}
-          </p>
-
-          <div className="pa-chair-list">
-            {session.chairpersons.map((person) => (
-              <span key={person.id} className="pa-chair">
-                {person.fullName}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Row 4: Track leaders */}
+      <PrintablePersonRow
+        label={session.trackLeaders.length > 1 ? "Track Leaders" : "Track Leader"}
+        people={session.trackLeaders}
+      />
 
       {/* Topics */}
       {topics.length > 0 && (
@@ -537,7 +598,7 @@ export function PrintableAgenda({ items }: PrintableAgendaProps) {
       <header
   className="pa-header"
   style={{
-    background: gradients.royalPurple,
+    background: gradients.primary,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -626,7 +687,7 @@ export function PrintableAgenda({ items }: PrintableAgendaProps) {
     </span>
 
     <span>
-      eagenda
+      eAgenda
       <span style={{ color: colors.orange[400] }}>.live</span>
     </span>
   </div>

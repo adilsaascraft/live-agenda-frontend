@@ -282,6 +282,7 @@ export type ColorShade = keyof typeof colors.blue;
 
 export const gradients = {
   // Purple & Violet
+  primary: "linear-gradient(90deg, #A03792 0%, #6F509D 50%, #0D6FAA 100%)",
   royalPurple: "linear-gradient(135deg, #7C3AED, #312E81)",
   purpleDream: "linear-gradient(135deg, #A855F7, #6B21A8)",
   violetNight: "linear-gradient(135deg, #8B5CF6, #1E1B4B)",

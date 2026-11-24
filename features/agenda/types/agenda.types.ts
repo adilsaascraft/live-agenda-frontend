@@ -15,6 +15,9 @@ export interface ApiHall {
 export interface ApiTrack {
   _id: string;
   trackName: string;
+  status?: string;
+  /** Present only on some tracks. */
+  trackLeaderIds?: ApiPerson[];
 }
 
 /**
@@ -113,6 +116,8 @@ export interface AgendaSession {
   endMinutes: number | null;
   hall: AgendaRef | null;
   track: AgendaRef | null;
+  /** Leaders of the session's track (empty when the track has none). */
+  trackLeaders: AgendaPerson[];
   chairpersons: AgendaPerson[];
   topics: AgendaTopic[];
   searchText: string;

@@ -1,10 +1,12 @@
-
 "use client";
 
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 
 import type { FilteredSession } from "../types/agenda.types";
 import { formatDate } from "@/features/dashboard/dashboard.utils";
+import { getSessionElementId, getTopicElementId } from "../utils/agenda.utils";
+import { AGENDA_REVEAL_EVENT } from "../hooks/useSpeakerNavigation";
+import { useHighlight } from "./HighlightContext";
 import { SessionCard } from "./SessionCard";
 
 import {
@@ -18,68 +20,130 @@ interface AgendaScheduleProps {
   filtered: readonly FilteredSession[];
 }
 
-interface HallGroup {
-  hallId: string;
-  hallName: string;
-  sessions: FilteredSession[];
-}
-
 interface DateGroup {
   dateKey: string;
   sessionDate: string;
-  halls: HallGroup[];
+  sessions: FilteredSession[];
 }
 
-function groupSessionsByDateAndHall(
+/** Groups sessions by calendar day only for the "Day N" heading. */
+function groupSessionsByDate(
   filtered: readonly FilteredSession[],
 ): DateGroup[] {
-  const dateMap = new Map<
-    string,
-    {
-      sessionDate: string;
-      halls: Map<string, HallGroup>;
-    }
-  >();
+  const dateMap = new Map<string, DateGroup>();
 
   for (const item of filtered) {
     const { session } = item;
+    let group = dateMap.get(session.dateKey);
 
-    const dateKey = session.dateKey;
-    const hallId = session.hall?.id ?? "unknown-hall";
-    const hallName = session.hall?.name ?? "Unassigned Hall";
-
-    if (!dateMap.has(dateKey)) {
-      dateMap.set(dateKey, {
+    if (!group) {
+      group = {
+        dateKey: session.dateKey,
         sessionDate: session.sessionDate,
-        halls: new Map(),
-      });
-    }
-
-    const dateGroup = dateMap.get(dateKey)!;
-
-    if (!dateGroup.halls.has(hallId)) {
-      dateGroup.halls.set(hallId, {
-        hallId,
-        hallName,
         sessions: [],
-      });
+      };
+      dateMap.set(session.dateKey, group);
     }
 
-    dateGroup.halls.get(hallId)!.sessions.push(item);
+    group.sessions.push(item);
   }
 
-  return Array.from(dateMap.entries()).map(([dateKey, dateGroup]) => ({
-    dateKey,
-    sessionDate: dateGroup.sessionDate,
-    halls: Array.from(dateGroup.halls.values()),
-  }));
+  return Array.from(dateMap.values());
 }
+
+/* -------------------------------------------------------------------------- */
+/* One accordion per session                                                   */
+/* -------------------------------------------------------------------------- */
+
+interface SessionAccordionProps {
+  item: FilteredSession;
+}
+
+const SessionAccordion = memo(function SessionAccordion({
+  item,
+}: SessionAccordionProps) {
+  const { session, topics } = item;
+  const value = session.id;
+
+  const [open, setOpen] = useState(true);
+
+  const { elementId: highlightedId, searchElementIds } = useHighlight();
+
+  // DOM ids that live inside this session's panel.
+  const ownIds = useMemo(
+    () =>
+      new Set<string>([
+        getSessionElementId(session.id),
+        ...topics.map((topic) => getTopicElementId(topic.id)),
+      ]),
+    [session.id, topics],
+  );
+
+  // Speaker navigation targets a card that is not rendered while collapsed.
+  useEffect(() => {
+    const onReveal = (event: Event) => {
+      const target = (event as CustomEvent<string>).detail;
+      if (ownIds.has(target)) setOpen(true);
+    };
+
+    window.addEventListener(AGENDA_REVEAL_EVENT, onReveal);
+    return () => window.removeEventListener(AGENDA_REVEAL_EVENT, onReveal);
+  }, [ownIds]);
+
+  // Schedule search / highlight: make sure matching cards are visible.
+  useEffect(() => {
+    const hit =
+      (highlightedId != null && ownIds.has(highlightedId)) ||
+      (searchElementIds ?? []).some((id) => ownIds.has(id));
+
+    if (hit) setOpen(true);
+  }, [highlightedId, searchElementIds, ownIds]);
+
+  return (
+    // Sky border around the whole session (title + card + topics)
+    <div className="overflow-hidden rounded-xl border-2 border-zinc-300 bg-background">
+      <Accordion
+        value={open ? [value] : []}
+        onValueChange={(next: unknown) =>
+          setOpen(Array.isArray(next) ? next.length > 0 : Boolean(next))
+        }
+        className="w-full"
+      >
+        <AccordionItem value={value} className="border-0">
+          <AccordionTrigger
+            aria-label={`Toggle session ${session.name}`}
+            className="hover:no-underline"
+          >
+            {/* Session name centred - only while collapsed */}
+            {open ? (
+              <span className="sr-only">{session.name}</span>
+            ) : (
+              <span className="flex-1 px-2 text-center text-base font-bold leading-snug tracking-tight text-zinc-800 sm:text-lg">
+                {session.name}
+              </span>
+            )}
+          </AccordionTrigger>
+
+          <AccordionContent className="pb-0">
+            <div className="px-3 pt-1 pb-3">
+              <SessionCard session={session} topics={topics} />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
+  );
+});
+
+/* -------------------------------------------------------------------------- */
+/* Schedule                                                                    */
+/* -------------------------------------------------------------------------- */
 
 export const AgendaSchedule = memo(function AgendaSchedule({
   filtered,
 }: AgendaScheduleProps) {
   const groupedSessions = useMemo(
-    () => groupSessionsByDateAndHall(filtered),
+    () => groupSessionsByDate(filtered),
     [filtered],
   );
 
@@ -91,66 +155,17 @@ export const AgendaSchedule = memo(function AgendaSchedule({
     <div className="space-y-8">
       {groupedSessions.map((dateGroup, dateIndex) => (
         <section
-  key={dateGroup.dateKey}
-  data-agenda-date-section
-  className="space-y-5"
->
-          {dateGroup.halls.map((hallGroup) => {
-            const accordionValue = `${dateGroup.dateKey}-${hallGroup.hallId}`;
+          key={dateGroup.dateKey}
+          data-agenda-date-section
+          className="space-y-5"
+        >
+          <h2 className="text-base font-bold tracking-tight text-rose-900 sm:text-lg">
+            Day {dateIndex + 1} : {formatDate(dateGroup.sessionDate)}
+          </h2>
 
-            return (
-              <div key={accordionValue}>
-                {/* Gradient border wrapper */}
-                <div className="rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500 p-[2px]">
-                  <div className="overflow-hidden rounded-[10px] bg-background">
-                    {/* Independent accordion for each Date + Hall */}
-                    <Accordion
-                      defaultValue={[accordionValue]}
-                      className="w-full"
-                    >
-                      <AccordionItem
-                        value={accordionValue}
-                        className="border-0"
-                      >
-                        {/* Date left / Hall right / Accordion icon */}
-                        <AccordionTrigger
-                          aria-label={`Toggle sessions for Day ${dateIndex + 1}, ${hallGroup.hallName}`}
-                          className="hover:no-underline"
-                        >
-                          <div className="flex w-full flex-wrap items-center justify-between gap-2 pr-2">
-                            <h3 className="text-base font-bold tracking-tight text-rose-900 sm:text-lg">
-                              Day {dateIndex + 1} :{" "}
-                              {formatDate(dateGroup.sessionDate)}
-                            </h3>
-
-                            <span className="text-sm font-bold tracking-wide text-orange-900">
-                              Hall : {hallGroup.hallName}
-                            </span>
-                          </div>
-                        </AccordionTrigger>
-
-                        {/* Divider */}
-                        <div className="mx-3 h-px bg-border" />
-
-                        {/* Session cards and topics */}
-                        <AccordionContent className="pb-0">
-                          <div className="space-y-8 px-3 pt-4 pb-3">
-                            {hallGroup.sessions.map(({ session, topics }) => (
-                              <SessionCard
-                                key={session.id}
-                                session={session}
-                                topics={topics}
-                              />
-                            ))}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {dateGroup.sessions.map((item) => (
+            <SessionAccordion key={item.session.id} item={item} />
+          ))}
         </section>
       ))}
     </div>
