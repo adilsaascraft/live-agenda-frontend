@@ -26,7 +26,7 @@ import {
 import { formatDate } from "@/features/dashboard/dashboard.utils";
 import { colors, gradients } from "@/lib/constants/colors";
 
-import { AGENDA_EVENT } from "../constants/agenda.constants";
+import { AGENDA_EVENT } from "../utils/agenda-event";
 import type { AgendaTopicLookup } from "../types/agenda.types";
 import { formatTimeRange, pluralize } from "../utils/format.utils";
 import { AgendaEmptyState } from "./AgendaEmptyState";

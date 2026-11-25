@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 
-import { AGENDA_EVENT } from "../constants/agenda.constants";
+import { AGENDA_EVENT } from "../utils/agenda-event";
 
 /**
  * Opens the browser print dialog (which also offers "Save as PDF").

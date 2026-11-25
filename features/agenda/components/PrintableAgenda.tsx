@@ -18,7 +18,7 @@ import {
 import { formatDate, formatNow } from "@/features/dashboard/dashboard.utils";
 import { colors, gradients } from "@/lib/constants/colors";
 
-import { AGENDA_EVENT } from "../constants/agenda.constants";
+import { AGENDA_EVENT } from "../utils/agenda-event";
 import { useIsClient } from "../hooks/useIsClient";
 import { useNow } from "../hooks/useNow";
 import type { AgendaTopicLookup } from "../types/agenda.types";

@@ -5,27 +5,48 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Activity, CalendarDays, MapPin } from "lucide-react";
 
 import { colors, gradients } from "@/lib/constants/colors";
-import { AGENDA_EVENT } from "../constants/agenda.constants";
+
+
+
+const AGENDA_EVENT = {
+  name: process.env.NEXT_PUBLIC_AGENDA_EVENT_NAME ?? "Conference 2026",
+  startDate: process.env.NEXT_PUBLIC_AGENDA_START_DATE ?? "",
+  endDate: process.env.NEXT_PUBLIC_AGENDA_END_DATE ?? "",
+  dateRangeLabel:
+    process.env.NEXT_PUBLIC_AGENDA_DATE_RANGE_LABEL ?? "",
+  venue:
+    process.env.NEXT_PUBLIC_AGENDA_VENUE ?? "",
+  location:
+    process.env.NEXT_PUBLIC_AGENDA_LOCATION ?? "",
+} as const;
+
 
 export function AgendaHeader() {
   const reduceMotion = useReducedMotion();
-  const [displayYear, setDisplayYear] = useState("2025");
 
   const titleMatch = AGENDA_EVENT.name.match(/^(.*?)(\s+\d{4})$/);
   const eventName = titleMatch?.[1] ?? AGENDA_EVENT.name;
 
-  useEffect(() => {
-    if (reduceMotion) {
-      setDisplayYear("2026");
-      return;
-    }
+  const eventYear = AGENDA_EVENT.startDate
+  ? new Date(`${AGENDA_EVENT.startDate}T00:00:00`).getFullYear().toString()
+  : "2026";
 
-    const timer = window.setTimeout(() => {
-      setDisplayYear("2026");
-    }, 3000);
+const [displayYear, setDisplayYear] = useState(
+  eventYear === "2026" ? "2025" : eventYear
+);
 
-    return () => window.clearTimeout(timer);
-  }, [reduceMotion]);
+useEffect(() => {
+  if (reduceMotion) {
+    setDisplayYear(eventYear);
+    return;
+  }
+
+  const timer = window.setTimeout(() => {
+    setDisplayYear(eventYear);
+  }, 3000);
+
+  return () => window.clearTimeout(timer);
+}, [reduceMotion, eventYear]);
 
   return (
     <motion.header

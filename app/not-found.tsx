@@ -13,16 +13,20 @@ export default function NotFoundPage() {
       transition={{ duration: 0.5 }}
       className="flex flex-col items-center justify-center min-h-screen bg-white p-6 text-center"
     >
-      {/* Image */}
-      <div className="w-[350px] h-[60vh] relative mb-8">
-        <Image
-          src="https://res.cloudinary.com/dymanaa1j/image/upload/v1757228277/not-found-image_uxn2ig.png"
-          alt="404 Not Found"
-          fill
-          className="object-fit"
-          priority
-        />
-      </div>
+      
+{/* Optimized 404 Image */}
+<div className="relative mb-8 h-[60vh] w-[350px]">
+  <Image
+    src="https://res.cloudinary.com/dymanaa1j/image/upload/v1757228277/not-found-image_uxn2ig.png"
+    alt="404 - Page Not Found"
+    fill
+    sizes="(max-width: 640px) 100vw, 350px"
+    className="object-contain"
+    priority
+    fetchPriority="high"
+  />
+</div>
+
 
       {/* Message */}
       <h1 className="text-4xl font-bold text-gray-900 mb-2">Page Not Found</h1>

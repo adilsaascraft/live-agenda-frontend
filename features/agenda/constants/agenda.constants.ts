@@ -4,19 +4,6 @@ import type {
   ParticipantRole,
 } from "../types/agenda.types";
 
-/* -------------------------------------------------------------------------- */
-/* Event                                                                       */
-/* -------------------------------------------------------------------------- */
-
-export const AGENDA_EVENT = {
-  name: "AROICON 2026",
-  startDate: "2026-12-03",
-  endDate: "2026-12-06",
-  dateRangeLabel: "03 December 2026 – 06 December 2026",
-  venue: "Hyderabad International Convention Centre (HICC)",
-  location: "Hyderabad, Telangana, India",
-} as const;
-
 /**
  * Fixed UTC offset of the event timezone (Asia/Kolkata == EVENT_TIME_ZONE in
  * dashboard.utils). India has no DST, so a constant offset is exact and lets
