@@ -18,7 +18,7 @@ export const sessionSchema = z.object({
     .string()
     .trim()
     .min(2, "Session name must contain at least 2 characters.")
-    .max(100, "Session name cannot exceed 100 characters."),
+    .max(1000, "Session name cannot exceed 1000 characters."),
 
   hallId: objectIdSchema,
 

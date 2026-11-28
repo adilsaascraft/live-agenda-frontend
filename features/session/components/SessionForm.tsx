@@ -8,7 +8,7 @@ import {
   type Resolver,
 } from "react-hook-form";
 import { Search, X, AlertCircle } from "lucide-react";
-
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -343,26 +343,27 @@ export function SessionForm({
         {/* ----------------------------------------------------------------- */}
 
         <FormField
-          control={form.control}
-          name="sessionName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Session Name</FormLabel>
+  control={form.control}
+  name="sessionName"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Session Name</FormLabel>
 
-              <FormControl>
-                <Input
-                  {...field}
-                  autoFocus
-                  placeholder="Enter session name"
-                  disabled={isPending}
-                  maxLength={100}
-                />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
+      <FormControl>
+        <Textarea
+          {...field}
+          autoFocus
+          placeholder="Enter session name"
+          disabled={isPending}
+          maxLength={1000}
+          className="min-h-24 resize-none"
         />
+      </FormControl>
+
+      <FormMessage />
+    </FormItem>
+  )}
+/>
 
 
 {/* ----------------------------------------------------------------- */}

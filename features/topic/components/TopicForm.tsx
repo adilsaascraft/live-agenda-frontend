@@ -14,7 +14,7 @@ import {
   MapPin,
   Layers3,
 } from "lucide-react";
-
+import { Textarea } from "@/components/ui/textarea";
 import { formatDateOnly } from "@/lib/formatIndianDate";
 
 import { Button } from "@/components/ui/button";
@@ -456,28 +456,28 @@ export function TopicForm({
 
 
           <FormField
-            control={form.control}
-            name="topicName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm font-semibold">
-                  Topic Name *
-                </FormLabel>
+  control={form.control}
+  name="topicName"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-sm font-semibold">
+        Topic Name *
+      </FormLabel>
 
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Enter topic name"
-                    maxLength={100}
-                    disabled={isPending}
-                    className="h-10 bg-background"
-                  />
-                </FormControl>
+      <FormControl>
+        <Textarea
+          {...field}
+          placeholder="Enter topic name"
+          maxLength={1000}
+          disabled={isPending}
+          className="min-h-24 bg-background resize-none"
+        />
+      </FormControl>
 
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <FormMessage />
+    </FormItem>
+  )}
+/>
 
           {/* ----------------------------------------------------------------- */}
                   {/* Start Time and End Time                                          */}

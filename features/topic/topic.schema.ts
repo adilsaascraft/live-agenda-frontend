@@ -12,7 +12,7 @@ export const topicSchema = z.object({
     .string()
     .trim()
     .min(2, "Topic name must contain at least 2 characters.")
-    .max(100, "Topic name cannot exceed 100 characters."),
+    .max(1000, "Topic name cannot exceed 1000 characters."),
 
   startTime: z
     .string()
